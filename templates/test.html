@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>lolmax</h1>
+<h2>{{ name }}</h2>
+
+{% for item in items %}
+{% if item == 2 %}
+{ % elif item == 3 %}
+{ % else %}
+{% endif %}
+<h3>{{ item|add:22 }}</h3>
+{% endfor %}
+{% endblock content %}
