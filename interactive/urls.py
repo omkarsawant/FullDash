@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from routerApp.views import test_view
+from overview.views import OverviewCreateView, OverviewUpdateView
 
 urlpatterns = [
-    path('overview/', include('overview.urls')),
-    path('admin/', admin.site.urls),
-    path('test/', test_view),
+    path('fulldash/admin/', admin.site.urls),
+    path('fulldash/create/', OverviewCreateView.as_view(), name='overview-create'),
+    path('fulldash/<int:id>/update',
+         OverviewUpdateView.as_view(), name='overview-update'),
 ]
