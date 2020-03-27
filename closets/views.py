@@ -19,6 +19,8 @@ class ClosetsCreateView(CreateView):
         for instance in instances:
             instance.overview = overview_object
             instance.save()
+        for form in formset.deleted_forms:
+            form.save(commit=False).delete()
         return redirect(self.get_success_url())
 
     def get(self, request, *args, **kwargs):
@@ -28,5 +30,5 @@ class ClosetsCreateView(CreateView):
         formset = self.form_class(queryset=previous_closets)
         return render(request, self.template_name, {'formset': formset})
 
-    def get_success_url(self, *args, **kwargs):
+    def get_success_url(self):
         return reverse('closets_create', kwargs={'id': self.kwargs.get('id')})
