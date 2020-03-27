@@ -26,9 +26,9 @@ class OverviewUpdateForm(forms.ModelForm):
             'project_type',
             'crest',
             'address',
-            'nearest_dc',
             'capacity',
             'headcount',
+            'nearest_dc',
         ]
 
     def __init__(self, *args, **kwargs):

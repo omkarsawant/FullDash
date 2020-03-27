@@ -4,7 +4,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Overview(models.Model):
-
     class ProjectTypeChoices(models.TextChoices):
         BROWNFIELD = 'brownfield', _('Brownfield')
         GREENFIELD = 'greenfield', _('Greenfield')
@@ -15,10 +14,10 @@ class Overview(models.Model):
 
     address = models.CharField(
         'Site Address', blank=True, max_length=512, null=True)
-    capacity = models.PositiveIntegerField(
+    capacity = models.IntegerField(
         'Site Capacity', blank=True, null=True)
     crest = models.IntegerField('Site CREST ID')
-    headcount = models.PositiveIntegerField(
+    headcount = models.IntegerField(
         'Site Headcount', blank=True, null=True)
     nearest_dc = models.CharField('Nearest DC to Site',
                                   blank=True, choices=NearestDcChoice.choices, max_length=4, null=True)
@@ -26,4 +25,4 @@ class Overview(models.Model):
                                     choices=ProjectTypeChoices.choices, default=ProjectTypeChoices.GREENFIELD, max_length=10,)
 
     def get_absolute_url(self):
-        return reverse('overview-update', kwargs={'id': self.id})
+        return reverse('overview_update', kwargs={'id': self.id})

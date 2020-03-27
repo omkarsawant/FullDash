@@ -10,26 +10,18 @@ from .forms import OverviewCreateForm, OverviewUpdateForm
 class OverviewCreateView(CreateView):
     def __init__(self, *args, **kwargs):
         self.form_class = OverviewCreateForm
-        self.submit_text = 'Lookup Site'
-        self.template_name = 'create_update.html'
-
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        form.submit_text = self.submit_text
-        return render(request, self.template_name, {'form': form})
+        self.template_name = 'overview_create.html'
 
 
 class OverviewUpdateView(UpdateView):
     def __init__(self, *args, **kwargs):
         self.form_class = OverviewUpdateForm
         self.queryset = Overview.objects.all()
-        self.submit_text = 'Create Network'
-        self.template_name = 'create_update.html'
+        self.template_name = 'overview_update.html'
 
     def get(self, request, *args, **kwargs):
         self.initial = self.get_site_details(model_to_dict(self.get_object()))
         form = self.form_class(initial=self.initial)
-        form.submit_text = self.submit_text
         return render(request, self.template_name, {'form': form})
 
     def get_object(self):
@@ -41,4 +33,4 @@ class OverviewUpdateView(UpdateView):
 
     def get_success_url(self, *args, **kwargs):
         # return reverse('overview:list')
-        return reverse('floors')
+        return reverse('closets_create', kwargs={'id': self.kwargs.get('id')})

@@ -1,9 +1,0 @@
-{% extends 'base.html' %}
-{% block content %}
-<form method="POST">{% csrf_token %}
-    {% for overview_field in form %}
-    <h3>{{ overview_field.label }}: {{ overview_field }}</h3>
-    {% endfor %}
-    <input type="submit" value="{{ form.submit_text }}">
-</form>
-{% endblock content %}

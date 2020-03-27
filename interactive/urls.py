@@ -15,11 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from closets.views import ClosetsCreateView
 from overview.views import OverviewCreateView, OverviewUpdateView
 
 urlpatterns = [
     path('fulldash/admin/', admin.site.urls),
-    path('fulldash/create/', OverviewCreateView.as_view(), name='overview-create'),
-    path('fulldash/<int:id>/update',
-         OverviewUpdateView.as_view(), name='overview-update'),
+    path('fulldash/create/', OverviewCreateView.as_view(), name='overview_create'),
+    path('fulldash/<int:id>/update/',
+         OverviewUpdateView.as_view(), name='overview_update'),
+    path('fulldash/<int:id>/closets/',
+         ClosetsCreateView.as_view(), name='closets_create'),
 ]
