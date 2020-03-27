@@ -12,6 +12,14 @@ class OverviewCreateView(CreateView):
         self.form_class = OverviewCreateForm
         self.template_name = 'overview_create.html'
 
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, initial=self.initial)
+        if form.is_valid():
+            return super().form_valid(form)
+        for error in form.errors.values():
+            messages.error(request, error)
+        return render(request, self.template_name, {'form': form})
+
 
 class OverviewUpdateView(UpdateView):
     def __init__(self, *args, **kwargs):
