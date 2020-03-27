@@ -3,10 +3,9 @@
 <form method="POST">{% csrf_token %}
     {{ formset.management_form }}
     {% for form in formset %}
-    {% for closets_field in form %}
-    {{ closets_field.errors }}
-    <h4>{{ closets_field.label }}: {{ closets_field }}</h4>
-    {% endfor %}
+    <h4>{{ form.floor.label }}: {{ form.floor }} {{ form.category.label }}: {{ form.category }} {{ form.DELETE }} Delete
+        Record</h4>
+    {{ form.id }}
     {% endfor %}
     <input type="submit" value="Save">
 </form>
