@@ -30,7 +30,3 @@ class ClosetsCreateView(CreateView):
 
     def get_success_url(self, *args, **kwargs):
         return reverse('closets_create', kwargs={'id': self.kwargs.get('id')})
-
-    def post(self, request, *args, **kwargs):
-        print(request.POST)
-        return super().post(request, *args, **kwargs)
