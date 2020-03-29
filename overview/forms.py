@@ -23,12 +23,16 @@ class OverviewUpdateForm(forms.ModelForm):
     class Meta:
         model = Overview
         fields = [
-            'project_type',
             'crest',
+            'project_type',
             'address',
             'capacity',
             'headcount',
             'nearest_dc',
+            'router',
+            'core',
+            'server',
+            'access',
         ]
 
     def __init__(self, *args, **kwargs):
