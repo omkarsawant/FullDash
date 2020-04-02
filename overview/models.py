@@ -4,11 +4,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Overview(models.Model):
-
-    class AccessChoices(models.TextChoices):
-        CATALYST_3850 = 'catalyst_3850', _('Catalyst 3850')
-        CATALYST_9300 = 'catalyst_9300', _('Catalyst 9300')
-
     class CoreChoices(models.TextChoices):
         NO_CORE = 'no_core', _('No Core Layer')
         CATALYST_3850 = 'catalyst_3850', _('Catalyst 3850')
@@ -40,7 +35,7 @@ class Overview(models.Model):
     project_type = models.CharField('Type of Project',
                                     choices=ProjectTypeChoices.choices, default=ProjectTypeChoices.GREENFIELD, max_length=10, null=True)
     address = models.CharField(
-        'Site Address', blank=True, max_length=512, null=True)
+        'Site Address', blank=True, max_length=128, null=True)
     capacity = models.IntegerField(
         'Site Capacity', blank=True, null=True)
     headcount = models.IntegerField(
@@ -53,8 +48,10 @@ class Overview(models.Model):
         'Core Layer', choices=CoreChoices.choices, max_length=13, null=True)
     server = models.CharField(
         'Server Layer', choices=ServerChoices.choices, max_length=15, null=True)
-    access = models.CharField(
-        'Access Layer', choices=AccessChoices.choices, max_length=13, null=True)
 
-    def get_absolute_url(self):
-        return reverse('overview_update', kwargs={'id': self.id})
+
+class StaticSummary(models.Model):
+    network = models.GenericIPAddressField(
+        'Summary Subnet Network', protocol='IPv4')
+    mask = models.GenericIPAddressField('Summary Subnet Mask', protocol='IPv4')
+    overview = models.ForeignKey(Overview, on_delete=models.CASCADE)

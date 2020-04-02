@@ -1,10 +1,31 @@
 from django.contrib import messages
 from django.forms.models import model_to_dict
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.generic import CreateView, UpdateView
 from .models import Overview
 from .forms import OverviewCreateForm, OverviewUpdateForm
+
+
+def overview_create_view(request, *args, **kwargs):
+    intial = None
+    # initialization
+    # form filling
+    if request.method == 'POST':
+        # initialization
+        # form filling
+        form = OverviewCreateForm(request.POST, initial=intial)
+        if form.is_valid():
+            model = form.save()
+            print(dir(model))
+            return redirect(reverse('overview_update', kwargs={'id': model.get('id')}))
+            # redirect
+        for error in form.errors.values():
+            messages.error(request, error)
+        return render(request, 'overview_create.html', {})
+    # initialization
+    # form filling
+    form = OverviewCreateForm(initial=intial)
+    return render(request, 'overview_create.html', {})
 
 
 class OverviewCreateView(CreateView):
