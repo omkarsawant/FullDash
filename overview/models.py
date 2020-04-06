@@ -33,21 +33,23 @@ class Overview(models.Model):
 
     crest = models.IntegerField('Site CREST ID')
     project_type = models.CharField('Type of Project',
-                                    choices=ProjectTypeChoices.choices, default=ProjectTypeChoices.GREENFIELD, max_length=10, null=True)
+                                    choices=ProjectTypeChoices.choices, default=ProjectTypeChoices.GREENFIELD, max_length=10)
     address = models.CharField(
-        'Site Address', blank=True, max_length=128, null=True)
+        'Site Address', max_length=128, null=True)
     capacity = models.IntegerField(
-        'Site Capacity', blank=True, null=True)
+        'Site Capacity', null=True)
     headcount = models.IntegerField(
-        'Site Headcount', blank=True, null=True)
+        'Site Headcount', null=True)
     nearest_dc = models.CharField('Nearest DC to Site',
-                                  blank=True, choices=NearestDcChoices.choices, max_length=4, null=True)
+                                  choices=NearestDcChoices.choices, max_length=4, null=True)
     router = models.CharField(
         'Router Layer', choices=RouterChoices.choices, max_length=11, null=True)
     core = models.CharField(
         'Core Layer', choices=CoreChoices.choices, max_length=13, null=True)
     server = models.CharField(
         'Server Layer', choices=ServerChoices.choices, max_length=15, null=True)
+    exception_confirmed = models.BooleanField(
+        'Exception Present & Confirmed', null=True)
 
 
 class StaticSummary(models.Model):

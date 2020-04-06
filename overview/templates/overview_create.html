@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <form method="POST">{% csrf_token %}
-    {% for overview_field in form %}
+    {% for overview_field in obj.form %}
     <h4>{{ overview_field.label }}: {{ overview_field }}</h4>
     {% endfor %}
     <input type="submit" value="Lookup Site">

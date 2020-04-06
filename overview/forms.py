@@ -31,7 +31,6 @@ class OverviewUpdateForm(forms.ModelForm):
             'router',
             'core',
             'server',
-            'access',
         ]
 
     def __init__(self, *args, **kwargs):

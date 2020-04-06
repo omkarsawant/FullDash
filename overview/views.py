@@ -2,64 +2,75 @@ from django.contrib import messages
 from django.forms.models import model_to_dict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.generic import CreateView, UpdateView
 from .models import Overview
 from .forms import OverviewCreateForm, OverviewUpdateForm
 
 
 def overview_create_view(request, *args, **kwargs):
-    intial = None
-    # initialization
-    # form filling
+    initial = dict()
+    obj = type('', (object,), {})()
+    if request.method == 'GET':
+        obj.form = OverviewCreateForm(initial=initial)
+        return render(request, 'overview_create.html', {'obj': obj})
     if request.method == 'POST':
-        # initialization
-        # form filling
-        form = OverviewCreateForm(request.POST, initial=intial)
-        if form.is_valid():
-            model = form.save()
-            print(dir(model))
-            return redirect(reverse('overview_update', kwargs={'id': model.get('id')}))
-            # redirect
-        for error in form.errors.values():
+        obj.form = OverviewCreateForm(request.POST, initial=initial)
+        if obj.form.is_valid():
+            model = obj.form.save()
+            return redirect(reverse('overview_update', kwargs={'id': model.id}))
+        for error in obj.form.errors.values():
             messages.error(request, error)
-        return render(request, 'overview_create.html', {})
-    # initialization
-    # form filling
-    form = OverviewCreateForm(initial=intial)
-    return render(request, 'overview_create.html', {})
+        return render(request, 'overview_create.html', {'obj': obj})
 
 
-class OverviewCreateView(CreateView):
-    def __init__(self, *args, **kwargs):
-        self.form_class = OverviewCreateForm
-        self.template_name = 'overview_create.html'
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST, initial=self.initial)
-        if form.is_valid():
-            return super().form_valid(form)
-        for error in form.errors.values():
+def overview_update_view(request, *args, **kwargs):
+    initial = dict()
+    obj = type('', (object,), {})()
+    template_name = 'overview_update.html'
+    overview_record = get_object_or_404(Overview, id=kwargs['id'])
+    initial.update(model_to_dict(overview_record))
+    if request.method == 'GET':
+        if not overview_record.capacity:
+            site_details = get_site_details(overview_record.crest)
+            for site_detail in site_details:
+                initial[site_detail] = site_details[site_detail]
+                exec('overview_record.' + site_detail +
+                     ' = site_details[site_detail]')
+            overview_record.save()
+        obj.form = OverviewUpdateForm(initial=initial)
+        obj.submit_text = 'Create Network'
+        return render(request, template_name, {'obj': obj})
+    if request.method == 'POST':
+        obj.form = OverviewUpdateForm(request.POST, instance=overview_record)
+        if obj.form.is_valid():
+            site_details = get_site_details(overview_record.crest)
+            meeting_standards = True
+            for site_detail in site_details:
+                print(str(request.POST[site_detail]))
+                print(str(site_details[site_detail]))
+                if str(request.POST[site_detail]) != str(site_details[site_detail]):
+                    meeting_standards = False
+                    break
+            if not meeting_standards:
+                if overview_record.exception_confirmed is None:
+                    overview_record.exception_confirmed = False
+                    obj.popup = 'True'  # do something here
+                    obj.submit_text = 'Confirm Non-Standard Network'
+                    overview_record.save()
+                    return render(request, template_name, {'obj': obj})
+                elif overview_record.exception_confirmed is False:
+                    overview_record.exception_confirmed = True
+            obj.form.save()
+            return redirect(reverse('closets_create', kwargs={'id': kwargs['id']}))
+        for error in obj.form.errors.values():
             messages.error(request, error)
-        return render(request, self.template_name, {'form': form})
+        return render(request, template_name, {'obj': obj})
 
 
-class OverviewUpdateView(UpdateView):
-    def __init__(self, *args, **kwargs):
-        self.form_class = OverviewUpdateForm
-        self.queryset = Overview.objects.all()
-        self.template_name = 'overview_update.html'
-
-    def get(self, request, *args, **kwargs):
-        self.initial = self.get_site_details(model_to_dict(self.get_object()))
-        form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form})
-
-    def get_object(self):
-        return get_object_or_404(Overview, id=self.kwargs.get('id'))
-
-    def get_site_details(self, site):
-        site['capacity'] = 915
-        return site
-
-    def get_success_url(self, *args, **kwargs):
-        # return reverse('overview:list')
-        return reverse('closets_create', kwargs={'id': self.kwargs.get('id')})
+def get_site_details(crest):
+    site_details = dict()
+    site_details['address'] = 'New York / 80 Pine'
+    site_details['capacity'] = 800
+    site_details['headcount'] = 600
+    site_details['nearest_dc'] = Overview.NearestDcChoices.AM1
+    return site_details

@@ -7,6 +7,31 @@ from .models import Closets
 from .forms import ClosetsCreateFormset
 
 
+def closets_create_view(request, *args, **kwargs):
+    intial = dict()
+    obj = type('', (object,), {})()
+    template_name = 'closets_create.html'
+    overview_record = get_object_or_404(Overview, id=kwargs['id'])
+    closets_records = Closets.objects.filter(overview=overview_record)
+    obj.formset = ClosetsCreateFormset(queryset=closets_records)
+    # form filling
+    if request.method == 'GET':
+        # initialization
+        # form filling
+        obj.form = OverviewCreateForm(initial=intial)
+        return render(request, template_name, {'obj': obj})
+    if request.method == 'POST':
+        # initialization
+        # form filling
+        obj.form = OverviewCreateForm(request.POST, initial=intial)
+        if obj.form.is_valid():
+            model = obj.form.save()
+            return redirect(reverse('url_name', kwargs={}))
+        for error in obj.form.errors.values():
+            messages.error(request, error)
+        return render(request, template_name, {'obj': obj})
+
+
 class ClosetsCreateView(CreateView):
     def __init__(self, *args, **kwargs):
         self.form_class = ClosetsCreateFormset
