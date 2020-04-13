@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.generic import CreateView, UpdateView
 from .models import Overview
-from .forms import OverviewCreateForm, OverviewUpdateForm
+from .forms import Navbar, OverviewCreateForm, OverviewUpdateForm
 
 
 def overview_create_view(request, *args, **kwargs):
@@ -28,6 +28,9 @@ def overview_update_view(request, *args, **kwargs):
     obj = type('', (object,), {})()
     template_name = 'overview_update.html'
     overview_record = get_object_or_404(Overview, id=kwargs['id'])
+    nav = Navbar(initial={'site': overview_record.crest})
+    obj.nav = nav
+    obj.overview_id = kwargs['id']
     initial.update(model_to_dict(overview_record))
     if request.method == 'GET':
         if not overview_record.capacity:

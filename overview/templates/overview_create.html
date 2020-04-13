@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
-<form method="POST">{% csrf_token %}
+<form class='ml-2 mt-4 mb-1' method="POST">{% csrf_token %}
     {% for overview_field in obj.form %}
-    <h4>{{ overview_field.label }}: {{ overview_field }}</h4>
+    <div class='row form-group'>
+        <label class="col-2 col-form-label">{{ overview_field.label }}</label>
+        <div class='col-4 mt-2 h6'>{{ overview_field }}</div>
+    </div>
     {% endfor %}
-    <input type="submit" value="Lookup Site">
+    <button type="submit" class='btn btn-outline-primary'>Lookup Site</button>
 </form>
 {% endblock content %}

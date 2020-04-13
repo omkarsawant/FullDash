@@ -1,12 +1,23 @@
 {% extends 'base.html' %}
 {% block content %}
-<form method="POST">{% csrf_token %}
-    {{ formset.management_form }}
-    {% for form in formset %}
-    <h4>{{ form.floor.label }}: {{ form.floor }} {{ form.category.label }}: {{ form.category }} {{ form.DELETE }} Delete
-        Record</h4>
+<form class='ml-2 mt-4 mb-1' method="POST">{% csrf_token %}
+    {{ obj.formset.management_form }}
+    {% for form in obj.formset %}
+    <div class='row'>
+        {% for closets_field in form %}
+        {% if closets_field.label != 'Id' %}
+        {% if closets_field.label == 'Delete' %}
+        <label class="mt-2 h6">Delete Record</label>
+        <div class='ml-3 mt-2 h6'>{{ closets_field }}</div>
+        {% else %}
+        <label class="col-2 col-form-label">{{ closets_field.label }}</label>
+        <div class='col-2 mt-2 h6'>{{ closets_field }}</div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
     {{ form.id }}
     {% endfor %}
-    <input type="submit" value="Save">
+    <button type='submit' class='btn btn-outline-primary mt-2'>Save</button>
 </form>
 {% endblock content %}

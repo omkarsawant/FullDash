@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from closets.views import ClosetsCreateView
+from closets.views import closets_create_view
 from overview.views import overview_create_view, overview_update_view
 
 urlpatterns = [
@@ -24,5 +24,5 @@ urlpatterns = [
     path('fulldash/<int:id>/update/',
          overview_update_view, name='overview_update'),
     path('fulldash/<int:id>/closets/',
-         ClosetsCreateView.as_view(), name='closets_create'),
+         closets_create_view, name='closets_create'),
 ]
