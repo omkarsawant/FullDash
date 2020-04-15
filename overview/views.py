@@ -48,8 +48,6 @@ def overview_update_view(request, *args, **kwargs):
             site_details = base_system.get_site_details(overview_record.crest)
             meeting_standards = True
             for site_detail in site_details:
-                print(str(request.POST[site_detail]))
-                print(str(site_details[site_detail]))
                 if str(request.POST[site_detail]) != str(site_details[site_detail]):
                     meeting_standards = False
                     break
