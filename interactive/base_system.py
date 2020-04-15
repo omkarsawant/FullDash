@@ -1,4 +1,6 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from closets.models import Closets
 from overview.forms import Navbar
 from overview.models import Overview
 
@@ -23,3 +25,9 @@ def initialize_navbar(obj, overview_id):
     obj.navbar = Navbar(initial={'site': overview_record.crest})
     obj.overview_id = overview_id
     return overview_record
+
+
+def show_error_page(request, modal_header, modal_body):
+    obj = type('', (object,), {})()
+    activate_modal(obj, modal_header, modal_body)
+    render(request, 'error.html', {'obj': obj})
