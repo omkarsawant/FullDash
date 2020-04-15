@@ -1,0 +1,20 @@
+{% if obj.modal_display %}
+<script>
+    function dismissModal() {
+        $('#Modalpopup').css('display', 'none');
+    }
+</script>
+<div id='Modalpopup' class='modal show fade' style='display:block;'>
+    <div class='modal-dialog'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <div class='modal-title'>{{ obj.modal_header }}</div>
+                <button onclick='dismissModal()' type='button' class='close btn-light'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <h6 class='modal-title'>{{ obj.modal_body }}</h6>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

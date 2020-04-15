@@ -6,10 +6,11 @@ class Navbar(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for visible in self.visible_fields():
-            visible.field.widget.attrs['class'] = 'col form-control'
+            visible.field.widget.attrs['class'] = 'selectpicker form-control form-control-dark'
+            visible.field.widget.attrs['data-live-search'] = 'true'
 
     site = forms.ModelChoiceField(queryset=Overview.objects.values_list(
-        'crest', flat=True))
+        'crest', flat=True), empty_label=None)
 
 
 class OverviewCreateForm(forms.ModelForm):

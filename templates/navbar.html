@@ -1,5 +1,15 @@
 <nav class='navbar navbar-dark sticky-top bg-dark p-0 shadow'>
     <h6 class='navbar-brand ml-4 mb-0'>FullDash AIG</h6>
+    <form class='col h6 mt-1' method='POST'>{% csrf_token %}
+        <ul class='nav'>
+            <li class='col'>
+                {{ obj.navbar.site }}
+            </li>
+            <li>
+                <button type='submit' class='text-nowrap form-control btn-outline-primary'>Select Network</button>
+            </li>
+        </ul>
+    </form>
 </nav>
 <div class='container-fluid'>
     <div class='row'>
@@ -10,10 +20,6 @@
                     <a class='nav-link' href='/fulldash/create/'>Create Network</a>
                 </li>
                 <h6 class='ml-2 mt-4 mb-1 text-muted'>Current Network</h6>
-                <form method="POST">{% csrf_token %}
-                    {{ obj.nav.site }}
-                    <button type='submit' class='col form-control btn-outline-primary mt-2'>Select Site</button>
-                </form>
                 <li>
                     <a class='nav-link'
                         href='http://192.168.254.10:6969/fulldash/{{ obj.overview_id }}/update/'>Overview</a>

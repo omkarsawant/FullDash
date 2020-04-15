@@ -3,6 +3,7 @@ from django.forms.models import model_to_dict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.generic import CreateView, UpdateView
+from interactive import base_system
 from .models import Overview
 from .forms import Navbar, OverviewCreateForm, OverviewUpdateForm
 
@@ -27,26 +28,24 @@ def overview_update_view(request, *args, **kwargs):
     initial = dict()
     obj = type('', (object,), {})()
     template_name = 'overview_update.html'
-    overview_record = get_object_or_404(Overview, id=kwargs['id'])
-    nav = Navbar(initial={'site': overview_record.crest})
-    obj.nav = nav
-    obj.overview_id = kwargs['id']
+    overview_record = base_system.initialize_navbar(obj, kwargs['id'])
     initial.update(model_to_dict(overview_record))
     if request.method == 'GET':
         if not overview_record.capacity:
-            site_details = get_site_details(overview_record.crest)
+            site_details = base_system.get_site_details(overview_record.crest)
             for site_detail in site_details:
                 initial[site_detail] = site_details[site_detail]
                 exec('overview_record.' + site_detail +
                      ' = site_details[site_detail]')
             overview_record.save()
         obj.form = OverviewUpdateForm(initial=initial)
+        obj.submit_type = 'btn-outline-primary'
         obj.submit_text = 'Create Network'
         return render(request, template_name, {'obj': obj})
     if request.method == 'POST':
         obj.form = OverviewUpdateForm(request.POST, instance=overview_record)
         if obj.form.is_valid():
-            site_details = get_site_details(overview_record.crest)
+            site_details = base_system.get_site_details(overview_record.crest)
             meeting_standards = True
             for site_detail in site_details:
                 print(str(request.POST[site_detail]))
@@ -57,7 +56,8 @@ def overview_update_view(request, *args, **kwargs):
             if not meeting_standards:
                 if overview_record.exception_confirmed is None:
                     overview_record.exception_confirmed = False
-                    obj.popup = 'True'  # do something here
+                    base_system.activate_modal(obj, 'Issue', 'Issue!')
+                    obj.submit_type = 'btn-outline-warning'
                     obj.submit_text = 'Confirm Non-Standard Network'
                     overview_record.save()
                     return render(request, template_name, {'obj': obj})
@@ -68,12 +68,3 @@ def overview_update_view(request, *args, **kwargs):
         for error in obj.form.errors.values():
             messages.error(request, error)
         return render(request, template_name, {'obj': obj})
-
-
-def get_site_details(crest):
-    site_details = dict()
-    site_details['address'] = 'New York / 80 Pine'
-    site_details['capacity'] = 800
-    site_details['headcount'] = 600
-    site_details['nearest_dc'] = Overview.NearestDcChoices.AM1
-    return site_details

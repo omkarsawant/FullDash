@@ -1,10 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-{% if obj.popup == 'True' %}
-<script>
-    window.alert('The devices chosen are not conforming to standards');
-</script>
-{% endif %}
 <form class='ml-2 mt-4 mb-1' method='POST'>{% csrf_token %}
     {% for overview_field in obj.form %}
     <div class='row form-group'>
@@ -12,6 +7,6 @@
         <div class='col-4 mt-2 h6'>{{ overview_field }}</div>
     </div>
     {% endfor %}
-    <button type="submit" class='btn btn-outline-primary'>{{ obj.submit_text }}</button>
+    <button type="submit" class='btn {{ obj.submit_type }}'>{{ obj.submit_text }}</button>
 </form>
 {% endblock content %}
