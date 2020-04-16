@@ -3,9 +3,11 @@ from closets.models import Closets
 
 
 class Router(models.Model):
-    hostname = models.CharField('Router Hostname', max_length=19)
-    loopback_ip = models.GenericIPAddressField('Loopback IP', protocol='IPv4')
-    downlink_1_intr = models.CharField(max_length=20)
+    hostname = models.CharField(
+        'Router Hostname', max_length=19, blank=False, null=True)
+    loopback_ip = models.GenericIPAddressField(
+        'Loopback IP', protocol='IPv4', blank=False, null=True)
+    downlink_1_intr = models.CharField(max_length=20, blank=False, null=True)
     downlink_1_desc = models.CharField(max_length=37)
     downlink_1_ip = models.GenericIPAddressField(
         'Downlink 1 IP', protocol='IPv4')
