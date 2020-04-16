@@ -1,14 +1,53 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from random import randint
 from closets.models import Closets
 from overview.forms import Navbar
 from overview.models import Overview
 
+ERROR_IMAGE_COUNT = 1
 
-def activate_modal(obj, modal_header, modal_body):
+modals = {
+    'NO_CLOSETS': {
+        'HEADER': '''Closets Closets Closets Closets''',
+        'BODY': '''No closets have been defined for this network''',
+    },
+    'NO_MDF': {
+        'HEADER': '''No MDFs Defined''',
+        'BODY': '''The site does not have any MDFs defined.''',
+    },
+    'NON_STANDARD': {
+        'HEADER': '''Non-Standard Network Build''',
+        'BODY': '''The options you have selected do not conform to the latest standards. Please click 'Confirm Non-Standard Network'  to confirm network creation''',
+    },
+}
+
+
+def activate_modal(obj, modal_key):
     obj.modal_display = 'True'  # do something here
-    obj.modal_header = modal_header
-    obj.modal_body = modal_body
+    obj.modal_header = modals[modal_key]['HEADER']
+    obj.modal_body = modals[modal_key]['BODY']
+
+
+def generate_error(obj, modal_key):
+    activate_modal(obj, modal_key)
+    obj.error_file = 'images/error' + \
+        str(randint(1, ERROR_IMAGE_COUNT)) + '.jpg'
+
+
+def get_device_records(device, mdf_closets):
+    device_records = device.objects.none()
+    for mdf_closet in mdf_closets:
+        device_records.union(device.objects.filter(closet=mdf_closet))
+    return device_records
+
+
+def get_mdf_closets(closets_records):
+    mdf_closets = list()
+    for closet_record in closets_records:
+        if closet_record.category in [Closets.CategoryChoices.MDF, Closets.CategoryChoices.MDF_IDF]:
+            mdf_closets.append(closet_record)
+    return mdf_closets
 
 
 def get_site_details(crest):
@@ -25,9 +64,3 @@ def initialize_navbar(obj, overview_id):
     obj.navbar = Navbar(initial={'site': overview_record.crest})
     obj.overview_id = overview_id
     return overview_record
-
-
-def show_error_page(request, modal_header, modal_body):
-    obj = type('', (object,), {})()
-    activate_modal(obj, modal_header, modal_body)
-    render(request, 'error.html', {'obj': obj})

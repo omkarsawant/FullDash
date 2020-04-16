@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-<img src="error.jpg" class="img-fluid" alt="Responsive image">
+{% load static %}
+<img src='{% static obj.error_file %}' class='col-5 img-fluid' alt='Error Image'>
 {% endblock content %}

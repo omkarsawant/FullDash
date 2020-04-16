@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 from closets.views import closets_create_view
 from overview.views import overview_create_view, overview_update_view
-from router.views import wan_landing_view
+from router.views import wan_landing_view, wan_listing_view, wan_form_view
 
 urlpatterns = [
     path('fulldash/admin/', admin.site.urls),
@@ -28,4 +28,8 @@ urlpatterns = [
          closets_create_view, name='closets_create'),
     path('fulldash/<int:id>/wanlanding/',
          wan_landing_view, name='wan_landing'),
+    path('fulldash/<int:id>/wanlisting/',
+         wan_listing_view, name='wan_listing'),
+    path('fulldash/<int:id>/wanform/',
+         wan_form_view, name='wan_form'),
 ]

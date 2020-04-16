@@ -54,7 +54,7 @@ def overview_update_view(request, *args, **kwargs):
             if not meeting_standards:
                 if overview_record.exception_confirmed is None:
                     overview_record.exception_confirmed = False
-                    base_system.activate_modal(obj, 'Issue', 'Issue!')
+                    base_system.activate_modal(obj, 'NON_STANDARD')
                     obj.submit_type = 'btn-outline-warning'
                     obj.submit_text = 'Confirm Non-Standard Network'
                     overview_record.save()
