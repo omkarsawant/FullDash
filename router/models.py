@@ -1,33 +1,102 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from closets.models import Closets
 
 
 class Router(models.Model):
+    class WanTypeChoices(models.TextChoices):
+        MPLS = 'mpls', _('MPLS')
+        P2P = 'p2p', _('Point-to-Point')
+
+    class WanProviderChoices(models.TextChoices):
+        ATT = 'att', _('AT&T')
+        BELLCANADA = 'bellcanada', _('Bell Canada')
+        CENTURYLINK = 'centurylink', _('Century Link')
+        CHINATELCOM = 'chinatelcom', _('China Telecom')
+        DEUTSCHETELEKOM = 'deutschetelekom', _('Deutsche Telekom')
+        EMBRATEL = 'embratel', _('Embratel')
+        FREE = 'free', _('Free')
+        GESTIONTELCOM = 'gestiontelcom', _('Gestion Telcom')
+        GLOBE = 'globe', _('Globe')
+        KDDI = 'kddi', _('KDDI')
+        KOREATELCOM = 'koreatelcom', _('Korea Telcom')
+        LEVEL3 = 'level3', _('Level3')
+        MCI = 'mci', _('MCI')
+        MXIS = 'mxis', _('MXIS')
+        NTTCOM = 'nttcom', _('NTTCOM')
+        ORANGE = 'orange', _('Orange')
+        PCCW = 'pccw', _('PCCW')
+        PLDT = 'pldt', _('PLDT')
+        SINGTEL = 'singtel', _('Singtel')
+        SOFTBANK = 'softbank', _('Softbank')
+        TATA = 'tata', _('Tata')
+        TELCOMARGENTINA = 'telcomargentina', _('Telcom Argentina')
+        TELCOMMALAYSIA = 'telcommalaysia', _('Telcom Malaysia')
+        TELEFONICA = 'telefonica', _('Telefonica')
+        TELSTRA = 'telstra', _('Telstra')
+        TELUS = 'telus', _('Telus')
+        VERIZON = 'verizon', _('Verizon')
+        VODAPHONE = 'vodaphone', _('Vodafone')
+        ZAYO = 'zayo', _('Zayo')
+
     hostname = models.CharField(
-        'Router Hostname', max_length=19, blank=False, null=True)
+        'Router Hostname', max_length=19)  # model
     loopback_ip = models.GenericIPAddressField(
-        'Loopback IP', protocol='IPv4', blank=False, null=True)
-    downlink_1_intr = models.CharField(max_length=20, blank=False, null=True)
-    downlink_1_desc = models.CharField(max_length=37)
+        'Loopback IP', protocol='IPv4')  # brownfield
+    downlink_1_desc = models.CharField('Downlink 1 Description', max_length=37)
     downlink_1_ip = models.GenericIPAddressField(
-        'Downlink 1 IP', protocol='IPv4')
+        'Downlink 1 IP', protocol='IPv4')  # brownfield
+
+    downlink_2_ip = models.GenericIPAddressField(
+        'Downlink 1 IP', protocol='IPv4')  # brownfield
+    interlink_1_ip = models.GenericIPAddressField(
+        'Interlink 1 IP', protocol='IPv4')  # brownfield
+    interlink_2_ip = models.GenericIPAddressField(
+        'Interlink 1 IP', protocol='IPv4')  # brownfield
+    wan_type = models.CharField('WAN Type',
+                                choices=WanTypeChoices.choices, default=WanTypeChoices.MPLS, max_length=10)  # greenfield
+    wan_provider = models.CharField('WAN Provider',
+                                    choices=WanProviderChoices.choices, max_length=20)  # greenfield
+    access_id = models.CharField(
+        'Circuit Access ID', max_length=80)  # greenfield
+    port_id = models.CharField('Circuit Port ID', max_length=80)  # greenfield
+    access_bw = models.IntegerField('Circuit Access Bandwidth')  # greenfield
+    port_bw = models.IntegerField('Circuit Port Bandwidth')  # greenfield
+    wan_ip = models.GenericIPAddressField(
+        'WAN Interface IP', protocol='IPv4')  # greenfield
+    local_asn = models.IntegerField('Local BGP ASN')  # greenfield
+    remote_asn = models.IntegerField('Remote BGP ASN')  # greenfield
+    other_router_loopback = models.GenericIPAddressField(
+        'Other Router Loopback', protocol='IPv4')  # brownfield
+    other_router_hostname = models.CharField(
+        'Other Router Hostname', max_length=19)  # model
+    isp_ip = models.GenericIPAddressField(
+        'ISP IP', protocol='IPv4')  # brownfield
+    closet = models.ForeignKey(Closets, on_delete=models.CASCADE)  # model
+
+    '''
+    ****programatically generated****
+    dna_token
+    loopback_desc
+    netflow_collector
+    qos_config
+    downlink_1_intr = models.CharField(max_length=20)
     downlink_2_intr = models.CharField(max_length=20)
     downlink_2_desc = models.CharField(max_length=37)
-    downlink_2_ip = models.GenericIPAddressField(
-        'Downlink 1 IP', protocol='IPv4')
+    lan_qos_policy
     interlink_1_intr = models.CharField(max_length=20)
     interlink_1_desc = models.CharField(max_length=37)
-    interlink_1_ip = models.GenericIPAddressField(
-        'Interlink 1 IP', protocol='IPv4')
     interlink_2_intr = models.CharField(max_length=20)
     interlink_2_desc = models.CharField(max_length=37)
-    interlink_2_ip = models.GenericIPAddressField(
-        'Interlink 1 IP', protocol='IPv4')
     wan_intr = models.CharField(max_length=20)
-    wan_desc = models.CharField(max_length=200)
-    wan_ip = models.GenericIPAddressField(
-        'WAN IP', protocol='IPv4')
-    wan_bw = models.IntegerField('Circuit Bandwidth')
-    local_asn = models.IntegerField('Local BGP ASN')
-    remote_asn = models.IntegerField('Remote BGP ASN')
-    closet = models.ForeignKey(Closets, on_delete=models.CASCADE)
+    wan_qos_policy
+    community_string
+    '''
+
+
+class Networks(models.Model):
+    subnet = models.GenericIPAddressField(
+        'Loopback IP', protocol='IPv4')  # greenfield
+    mask = models.GenericIPAddressField(
+        'Loopback IP', protocol='IPv4')  # greenfield
+    router = models.ForeignKey(Router, on_delete=models.CASCADE)  # model
