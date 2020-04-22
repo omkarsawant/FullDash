@@ -2,7 +2,7 @@
 {% for message in messages %}
 <div class='row w-100'>
     <div class='col'>
-        <div class='alert alert-danger alert-dismissable'>
+        <div class='alert {{ message.tags }} alert-dismissable'>
             {{ message|striptags }}
             <button type='button' class='close' data-dismiss='alert'>
                 <span aria-hidden='true'>&times;</span>

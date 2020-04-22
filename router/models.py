@@ -42,37 +42,44 @@ class Router(models.Model):
     hostname = models.CharField(
         'Router Hostname', max_length=19)  # model
     loopback_ip = models.GenericIPAddressField(
-        'Loopback IP', protocol='IPv4')  # brownfield
-    downlink_1_desc = models.CharField('Downlink 1 Description', max_length=37)
+        'Loopback IP', protocol='IPv4', null=True)  # brownfield
+    downlink_1_desc = models.CharField(
+        'Downlink 1 Description', max_length=37, null=True)  # model
     downlink_1_ip = models.GenericIPAddressField(
-        'Downlink 1 IP', protocol='IPv4')  # brownfield
-
+        'Downlink 1 IP', protocol='IPv4', null=True)  # brownfield
+    downlink_2_desc = models.CharField(max_length=37, null=True)  # model
     downlink_2_ip = models.GenericIPAddressField(
-        'Downlink 1 IP', protocol='IPv4')  # brownfield
+        'Downlink 1 IP', protocol='IPv4', null=True)  # brownfield
+    interlink_1_desc = models.CharField(max_length=37, null=True)  # model
     interlink_1_ip = models.GenericIPAddressField(
-        'Interlink 1 IP', protocol='IPv4')  # brownfield
+        'Interlink 1 IP', protocol='IPv4', null=True)  # brownfield
+    interlink_2_desc = models.CharField(max_length=37, null=True)  # model
     interlink_2_ip = models.GenericIPAddressField(
-        'Interlink 1 IP', protocol='IPv4')  # brownfield
+        'Interlink 1 IP', protocol='IPv4', null=True)  # brownfield
     wan_type = models.CharField('WAN Type',
-                                choices=WanTypeChoices.choices, default=WanTypeChoices.MPLS, max_length=10)  # greenfield
+                                choices=WanTypeChoices.choices, default=WanTypeChoices.MPLS, max_length=10, null=True)  # greenfield
     wan_provider = models.CharField('WAN Provider',
-                                    choices=WanProviderChoices.choices, max_length=20)  # greenfield
+                                    choices=WanProviderChoices.choices, max_length=20, null=True)  # greenfield
     access_id = models.CharField(
-        'Circuit Access ID', max_length=80)  # greenfield
-    port_id = models.CharField('Circuit Port ID', max_length=80)  # greenfield
-    access_bw = models.IntegerField('Circuit Access Bandwidth')  # greenfield
-    port_bw = models.IntegerField('Circuit Port Bandwidth')  # greenfield
+        'Circuit Access ID', max_length=80, null=True)  # greenfield
+    port_id = models.CharField(
+        'Circuit Port ID', max_length=80, null=True)  # greenfield
+    access_bw = models.IntegerField(
+        'Circuit Access Bandwidth', null=True)  # greenfield
+    port_bw = models.IntegerField(
+        'Circuit Port Bandwidth', null=True)  # greenfield
     wan_ip = models.GenericIPAddressField(
-        'WAN Interface IP', protocol='IPv4')  # greenfield
-    local_asn = models.IntegerField('Local BGP ASN')  # greenfield
-    remote_asn = models.IntegerField('Remote BGP ASN')  # greenfield
+        'WAN Interface IP', protocol='IPv4', null=True)  # greenfield
+    local_asn = models.IntegerField('Local BGP ASN', null=True)  # greenfield
+    remote_asn = models.IntegerField('Remote BGP ASN', null=True)  # greenfield
     other_router_loopback = models.GenericIPAddressField(
-        'Other Router Loopback', protocol='IPv4')  # brownfield
+        'Other Router Loopback', protocol='IPv4', null=True)  # brownfield
     other_router_hostname = models.CharField(
-        'Other Router Hostname', max_length=19)  # model
+        'Other Router Hostname', max_length=19, null=True)  # model
     isp_ip = models.GenericIPAddressField(
-        'ISP IP', protocol='IPv4')  # brownfield
-    closet = models.ForeignKey(Closets, on_delete=models.CASCADE)  # model
+        'ISP IP', protocol='IPv4', null=True)  # brownfield
+    closet = models.ForeignKey(
+        Closets, on_delete=models.CASCADE, null=True)  # model
 
     '''
     ****programatically generated****
@@ -82,12 +89,9 @@ class Router(models.Model):
     qos_config
     downlink_1_intr = models.CharField(max_length=20)
     downlink_2_intr = models.CharField(max_length=20)
-    downlink_2_desc = models.CharField(max_length=37)
     lan_qos_policy
     interlink_1_intr = models.CharField(max_length=20)
-    interlink_1_desc = models.CharField(max_length=37)
     interlink_2_intr = models.CharField(max_length=20)
-    interlink_2_desc = models.CharField(max_length=37)
     wan_intr = models.CharField(max_length=20)
     wan_qos_policy
     community_string

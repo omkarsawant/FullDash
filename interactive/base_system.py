@@ -4,8 +4,10 @@ from random import randint
 from closets.models import Closets
 from overview.forms import Navbar
 from overview.models import Overview
+from router.models import Router
 
 ERROR_IMAGE_COUNT = 1
+HOSTNAME = 'r{device}{country}{crest:0>4}-{closet}-{instance:03}'
 
 modals = {
     'NO_CLOSETS': {
@@ -20,6 +22,14 @@ modals = {
         'HEADER': '''Non-Standard Network Build''',
         'BODY': '''The options you have selected do not conform to the latest standards. Please click 'Confirm Non-Standard Network'  to confirm network creation''',
     },
+    'WAN_GREEN_SUCCESS': {
+        'HEADER': '''Build successful''',
+        'BODY': '''Done!''',
+    },
+}
+
+device_types = {
+    Router: 'wan',
 }
 
 
@@ -35,10 +45,25 @@ def generate_error(obj, modal_key):
         str(randint(1, ERROR_IMAGE_COUNT)) + '.jpg'
 
 
+def get_device_hostname(overview_record, closet, device, instance=None):
+    # TODO: define
+    hostname_data = {
+        'device': device_types[device],
+        'country': 'us',
+        'crest': str(overview_record.crest)[-4:],
+        'closet': '003a',
+        'instance': instance,
+    }
+    if not instance:
+        pass
+    return HOSTNAME.format(**hostname_data)
+
+
 def get_device_records(device, mdf_closets):
     device_records = device.objects.none()
     for mdf_closet in mdf_closets:
-        device_records.union(device.objects.filter(closet=mdf_closet))
+        device_records = device_records.union(
+            device.objects.filter(closet=mdf_closet))
     return device_records
 
 
@@ -48,6 +73,21 @@ def get_mdf_closets(closets_records):
         if closet_record.category in [Closets.CategoryChoices.MDF, Closets.CategoryChoices.MDF_IDF]:
             mdf_closets.append(closet_record)
     return mdf_closets
+
+
+def get_mdf_device_hostnames(overview_record, mdf_closets, device):
+    mdf_device_hostnames = list()
+    if len(mdf_closets) == 1:
+        mdf_device_hostnames.append(get_device_hostname(
+            overview_record, mdf_closets[0], device, 1))
+        mdf_device_hostnames.append(get_device_hostname(
+            overview_record, mdf_closets[0], device, 2))
+    else:
+        mdf_device_hostnames.append(get_device_hostname(
+            overview_record, mdf_closets[0], device, 1))
+        mdf_device_hostnames.append(get_device_hostname(
+            overview_record, mdf_closets[1], device, 2))
+    return mdf_device_hostnames
 
 
 def get_site_details(crest):

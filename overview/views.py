@@ -20,6 +20,7 @@ def overview_create_view(request, *args, **kwargs):
             model = obj.form.save()
             return redirect(reverse('overview_update', kwargs={'id': model.id}))
         for error in obj.form.errors.values():
+            obj.message_type = 'danger'
             messages.error(request, error)
         return render(request, 'overview_create.html', {'obj': obj})
 
@@ -52,17 +53,18 @@ def overview_update_view(request, *args, **kwargs):
                     meeting_standards = False
                     break
             if not meeting_standards:
-                if overview_record.exception_confirmed is None:
-                    overview_record.exception_confirmed = False
+                if overview_record.signal_exception is None:
+                    overview_record.signal_exception = False
                     base_system.activate_modal(obj, 'NON_STANDARD')
                     obj.submit_type = 'btn-outline-warning'
                     obj.submit_text = 'Confirm Non-Standard Network'
                     overview_record.save()
                     return render(request, template_name, {'obj': obj})
-                elif overview_record.exception_confirmed is False:
-                    overview_record.exception_confirmed = True
+                elif overview_record.signal_exception is False:
+                    overview_record.signal_exception = True
             obj.form.save()
             return redirect(reverse('closets_create', kwargs={'id': kwargs['id']}))
         for error in obj.form.errors.values():
+            obj.message_type = 'danger'
             messages.error(request, error)
         return render(request, template_name, {'obj': obj})

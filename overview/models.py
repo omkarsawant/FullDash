@@ -48,8 +48,18 @@ class Overview(models.Model):
         'Core Layer', choices=CoreChoices.choices, max_length=13, null=True)
     server = models.CharField(
         'Server Layer', choices=ServerChoices.choices, max_length=15, null=True)
-    exception_confirmed = models.BooleanField(
+    signal_access_updated = models.BooleanField(
+        'Access Layer Updated', null=True)
+    signal_core_updated = models.BooleanField(
+        'Core Layer Updated', null=True)
+    signal_exception = models.BooleanField(
         'Exception Present & Confirmed', null=True)
+    signal_server_updated = models.BooleanField(
+        'Server Layer Updated', null=True)
+    signal_site_built = models.BooleanField(
+        'Site Built', null=True)
+    signal_wan_updated = models.BooleanField(
+        'WAN Layer Updated', null=True)
 
 
 class StaticSummary(models.Model):

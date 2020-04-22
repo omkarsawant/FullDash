@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4 class='mt-4 mb-4 ml-2'>Greenfield Site WAN Layer Initialization Form</h4>
+<form method="POST">{% csrf_token %}
+    <div class='row form-group mb-5'>
+        {% for router in obj.router_hostnames%}
+        <div class='col border border-primary border-top-0 border-bottom-0 border-left-0 mt-4'>
+            <h5 class='d-flex justify-content-center form-group mb-5'>Parameters for {{ router }}</h5>
+            {% for field in obj.form %}
+            {% if field.name != 'local_asn' %}
+            <div class='row form-group'>
+                <label class='col-4'>{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <h5 class='form-group mb-5'>Parameters for both {{ obj.router_hostnames.0 }} &
+        {{ obj.router_hostnames.1 }}</h5>
+    <div class='row form-group'>
+        <label class='col-2'>{{ obj.form.local_asn.label }}</label>
+        {{ obj.form.local_asn }}
+    </div>
+    <button type="submit" class='btn btn-outline-primary mt-4'>Submit</button>
+</form>
+{% endblock content %}

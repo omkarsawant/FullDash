@@ -13,9 +13,9 @@
 
 <body>
   {% include 'navbar.html' %}
-  {% include 'messages.html' %}
-  {% include 'modal.html' %}
   <div class='col-10'>
+    {% include 'messages.html' %}
+    {% include 'modal.html' %}
     {% block content %}
     Error in template ineheritance.
     {% endblock content %}
