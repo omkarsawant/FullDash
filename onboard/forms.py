@@ -27,6 +27,7 @@ class OnboardDetailForm(forms.ModelForm):
             'address',
             'capacity',
             'headcount',
+            'network_type',
             'nearest_dc',
             'router',
             'core',

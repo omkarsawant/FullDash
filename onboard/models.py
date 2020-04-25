@@ -14,6 +14,16 @@ class Site(models.Model):
         AM1 = 'am1', _('AM1')
         AM2 = 'am2', _('AM2')
 
+    class NetworkTypeChoices(models.TextChoices):
+        MICRO_BRANCH = 'micro_branch', _('Micro Branch')
+        MINI_BRANCH = 'mini_branch', _('Mini Branch')
+        SMALL_BRANCH = 'small_branch', _('Small Branch')
+        MEDIUM_BRANCH_1 = 'medium_branch_1', _('Medium Branch (1-2 Floors)')
+        MEDIUM_BRANCH_2 = 'medium_branch_2', _('Medium Branch (3-10 Floors)')
+        LARGE_BRANCH = 'large_branch', _('Large Branch')
+        MEDIUM_CAMPUS = 'medium_campus', _('Medium Campus')
+        LARGE_CAMPUS = 'large_campus', _('Large Campus')
+
     class ProjectTypeChoices(models.TextChoices):
         BROWNFIELD = 'brownfield', _('Brownfield')
         GREENFIELD = 'greenfield', _('Greenfield')
@@ -40,6 +50,8 @@ class Site(models.Model):
         'Site Capacity')
     headcount = models.IntegerField(
         'Site Headcount')
+    network_type = models.CharField(
+        'Network Type', choices=NetworkTypeChoices.choices, default=NetworkTypeChoices.MICRO_BRANCH, max_length=27)
     nearest_dc = models.CharField('Nearest DC',
                                   choices=NearestDcChoices.choices, max_length=4)
     router = models.CharField(

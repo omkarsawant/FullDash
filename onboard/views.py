@@ -37,6 +37,7 @@ def onboarding_view(request, *args, **kwargs):
                 site_record_number = len(
                     Site.objects.filter(crest=site_record.crest)) + 1
                 site_record.network_name = f'{site_record.crest}--{site_record.address}--{site_record_number:03}'
+                site_record.signal_onboarded_site = True
                 site_record.save()
                 return redirect(reverse('closets', kwargs={'id': site_record.id}))
             base_system.set_form_errors(request, obj.form)

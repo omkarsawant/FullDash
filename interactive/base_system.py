@@ -12,7 +12,7 @@ MESSAGES = {
     'ACCESS_UPDATED': '',
     'CORE_UPDATED': '',
     'SERVER_UPDATED': '',
-    'SITE_ONBOARDED': '',
+    'SITE_ONBOARDED': 'Site was successfully onboarded. Please create network closets below.',
     'WAN_UPDATED': '',
 }
 
@@ -118,6 +118,7 @@ def get_site_details(crest):
     site_details['address'] = 'New York/80 Pine'
     site_details['capacity'] = 800
     site_details['headcount'] = 600
+    site_details['network_type'] = Site.NetworkTypeChoices.MICRO_BRANCH
     site_details['nearest_dc'] = Site.NearestDcChoices.AM1
     return site_details
 
@@ -128,6 +129,7 @@ def initialize_navbar(obj, request, site_id=None):
         obj.navbar = NavbarForm(initial={'site': site_record.network_name})
         if site_record.signal_onboarded_site:
             messages.success(request, MESSAGES['SITE_ONBOARDED'])
+            site_record.signal_onboarded_site = False
         if site_record.signal_updated_access:
             messages.success(request, MESSAGES['ACCESS_UPDATED'])
         if site_record.signal_updated_core:
@@ -136,6 +138,7 @@ def initialize_navbar(obj, request, site_id=None):
             messages.success(request, MESSAGES['SERVER_UPDATED'])
         if site_record.signal_updated_wan:
             messages.success(request, MESSAGES['WAN_UPDATED'])
+        site_record.save()
         # TODO: get caller name and display messages
     else:
         site_record = None

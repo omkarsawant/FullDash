@@ -45,6 +45,7 @@ class OverviewForm(forms.ModelForm):
             'project_type',
             'capacity',
             'headcount',
+            'network_type',
             'nearest_dc',
             'router',
             'core',
