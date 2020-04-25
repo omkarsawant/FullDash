@@ -6,7 +6,8 @@
                 {{ obj.navbar.site }}
             </li>
             <li>
-                <button type='submit' class='text-nowrap form-control btn-outline-primary'>Select Network</button>
+                <button type='submit' name='navbar' class='text-nowrap form-control btn-outline-primary'>Select
+                    Network</button>
             </li>
         </ul>
     </form>
@@ -17,27 +18,29 @@
             <ul class='nav flex-column'>
                 <h6 class='ml-2 mt-4 mb-1 text-muted'>Organization</h6>
                 <li>
-                    <a class='nav-link' href='/fulldash/create/'>Create Network</a>
+                    <a class='nav-link' href='/fulldash/onboard/'>Create Network</a>
                 </li>
+                {% if obj.site_id %}
                 <h6 class='ml-2 mt-4 mb-1 text-muted'>Current Network</h6>
                 <li>
-                    <a class='nav-link' href='/fulldash/{{ obj.overview_id }}/update/'>Overview</a>
+                    <a class='nav-link' href='/fulldash/{{ obj.site_id }}/overview/'>Overview</a>
                 </li>
                 <li>
-                    <a class='nav-link' href='/fulldash/{{ obj.overview_id }}/closets/'>Closets</a>
+                    <a class='nav-link' href='/fulldash/{{ obj.site_id }}/closets/'>Closets</a>
                 </li>
                 <li>
-                    <a class='nav-link' href='/fulldash/{{ obj.overview_id }}/wanlanding/'>WAN
+                    <a class='nav-link' href='/fulldash/{{ obj.site_id }}/wanlanding/'>WAN
                         Layer</a>
                 </li>
                 <li>
-                    <a class='nav-link' href='/fulldash/{{ obj.overview_id }}/corelanding/'>Core Layer</a>
+                    <a class='nav-link' href='/fulldash/{{ obj.site_id }}/corelanding/'>Core Layer</a>
                 </li>
                 <li>
-                    <a class='nav-link' href='/fulldash/{{ obj.overview_id }}/serverlanding/'>Server Layer</a>
+                    <a class='nav-link' href='/fulldash/{{ obj.site_id }}/serverlanding/'>Server Layer</a>
                 </li>
                 <li>
-                    <a class='nav-link' href='/fulldash/{{ obj.overview_id }}/accesslanding/'>Access Layer</a>
+                    <a class='nav-link' href='/fulldash/{{ obj.site_id }}/accesslanding/'>Access Layer</a>
                 </li>
+                {% endif %}
             </ul>
         </nav>

@@ -1,15 +1,22 @@
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.contrib import messages
 from random import randint
-from closets.models import Closets
-from overview.forms import Navbar
-from overview.models import Overview
+from closet.models import Closet
+from onboard.models import Site
+from overview.forms import NavbarForm
 from router.models import Router
 
 ERROR_IMAGE_COUNT = 1
 HOSTNAME = 'r{device}{country}{crest:0>4}-{closet}-{instance:03}'
 
-modals = {
+MESSAGES = {
+    'ACCESS_UPDATED': '',
+    'CORE_UPDATED': '',
+    'SERVER_UPDATED': '',
+    'SITE_ONBOARDED': '',
+    'WAN_UPDATED': '',
+}
+
+MODALS = {
     'NO_CLOSETS': {
         'HEADER': '''Closets Closets Closets Closets''',
         'BODY': '''No closets have been defined for this network''',
@@ -28,15 +35,30 @@ modals = {
     },
 }
 
-device_types = {
+PLACEHOLDERS = {
+    'IP': 'A.B.C.D/n',
+    'BW': 'Bandwidth in Mbps'  # TODO: other placeholders
+}
+
+DEVICE_TYPES = {
     Router: 'wan',
 }
 
 
 def activate_modal(obj, modal_key):
     obj.modal_display = 'True'  # do something here
-    obj.modal_header = modals[modal_key]['HEADER']
-    obj.modal_body = modals[modal_key]['BODY']
+    obj.modal_header = MODALS[modal_key]['HEADER']
+    obj.modal_body = MODALS[modal_key]['BODY']
+
+
+def check_hardware_standards(request, crest):
+    site_details = get_site_details(crest)
+    meeting_standards = True
+    for site_detail in site_details:
+        if str(request.POST[site_detail]) != str(site_details[site_detail]):
+            meeting_standards = False
+            break
+    return meeting_standards
 
 
 def generate_error(obj, modal_key):
@@ -45,12 +67,12 @@ def generate_error(obj, modal_key):
         str(randint(1, ERROR_IMAGE_COUNT)) + '.jpg'
 
 
-def get_device_hostname(overview_record, closet, device, instance=None):
+def get_device_hostname(site_record, closet, device, instance=None):
     # TODO: define
     hostname_data = {
-        'device': device_types[device],
+        'device': DEVICE_TYPES[device],
         'country': 'us',
-        'crest': str(overview_record.crest)[-4:],
+        'crest': str(site_record.crest)[-4:],
         'closet': '003a',
         'instance': instance,
     }
@@ -67,40 +89,76 @@ def get_device_records(device, mdf_closets):
     return device_records
 
 
-def get_mdf_closets(closets_records):
+def get_mdf_closets(closet_records):
     mdf_closets = list()
-    for closet_record in closets_records:
-        if closet_record.category in [Closets.CategoryChoices.MDF, Closets.CategoryChoices.MDF_IDF]:
+    for closet_record in closet_records:
+        if closet_record.category in [Closet.CategoryChoices.MDF, Closet.CategoryChoices.MDF_IDF]:
             mdf_closets.append(closet_record)
     return mdf_closets
 
 
-def get_mdf_device_hostnames(overview_record, mdf_closets, device):
+def get_mdf_device_hostnames(site_record, mdf_closets, device):
     mdf_device_hostnames = list()
     if len(mdf_closets) == 1:
         mdf_device_hostnames.append(get_device_hostname(
-            overview_record, mdf_closets[0], device, 1))
+            site_record, mdf_closets[0], device, 1))
         mdf_device_hostnames.append(get_device_hostname(
-            overview_record, mdf_closets[0], device, 2))
+            site_record, mdf_closets[0], device, 2))
     else:
         mdf_device_hostnames.append(get_device_hostname(
-            overview_record, mdf_closets[0], device, 1))
+            site_record, mdf_closets[0], device, 1))
         mdf_device_hostnames.append(get_device_hostname(
-            overview_record, mdf_closets[1], device, 2))
+            site_record, mdf_closets[1], device, 2))
     return mdf_device_hostnames
 
 
 def get_site_details(crest):
+    #TODO: define
     site_details = dict()
-    site_details['address'] = 'New York / 80 Pine'
+    site_details['address'] = 'New York/80 Pine'
     site_details['capacity'] = 800
     site_details['headcount'] = 600
-    site_details['nearest_dc'] = Overview.NearestDcChoices.AM1
+    site_details['nearest_dc'] = Site.NearestDcChoices.AM1
     return site_details
 
 
-def initialize_navbar(obj, overview_id):
-    overview_record = get_object_or_404(Overview, id=overview_id)
-    obj.navbar = Navbar(initial={'site': overview_record.crest})
-    obj.overview_id = overview_id
-    return overview_record
+def initialize_navbar(obj, request, site_id=None):
+    if site_id:
+        site_record = Site.objects.get(id=site_id)
+        obj.navbar = NavbarForm(initial={'site': site_record.network_name})
+        if site_record.signal_onboarded_site:
+            messages.success(request, MESSAGES['SITE_ONBOARDED'])
+        if site_record.signal_updated_access:
+            messages.success(request, MESSAGES['ACCESS_UPDATED'])
+        if site_record.signal_updated_core:
+            messages.success(request, MESSAGES['CORE_UPDATED'])
+        if site_record.signal_updated_server:
+            messages.success(request, MESSAGES['SERVER_UPDATED'])
+        if site_record.signal_updated_wan:
+            messages.success(request, MESSAGES['WAN_UPDATED'])
+        # TODO: get caller name and display messages
+    else:
+        site_record = None
+        obj.navbar = NavbarForm()
+    obj.site_id = site_id
+    return site_record
+
+
+def set_form_errors(request, *forms):
+    # TODO: remove duplicates
+    for form in forms:
+        for error in form.errors.values():
+            messages.error(request, error)
+
+
+def set_formset_errors(request, *formsets):
+    # TODO: remove duplicates
+    for formset in formsets:
+        for form in formset:
+            for error in form.errors.values():
+                messages.error(request, error)
+
+
+def set_widget_attributes(fields):
+    #TODO: define
+    pass

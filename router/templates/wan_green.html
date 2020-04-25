@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<h4 class='mt-4 mb-4 ml-2'>Greenfield Site WAN Layer Initialization Form</h4>
+<h4 class='mt-4 mb-4 ml-2'>WAN Layer Onboarding Form</h4>
 <form method="POST">{% csrf_token %}
     <div class='row form-group mb-5'>
         {% for router in obj.router_hostnames%}

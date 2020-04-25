@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
-<h4 class='mt-4 mb-4 ml-2'>Brownfield Site WAN Layer Modification Form</h4>
+<h4 class='mt-4 mb-4 ml-2'>WAN Layer Modification Form</h4>
 <form method="POST">{% csrf_token %}
     <div class='row form-group mb-5'>
         <div class='col border border-primary border-top-0 border-bottom-0 border-left-0 mt-4'>
             <h5 class='d-flex justify-content-center form-group mb-5'>Parameters for {{ obj.router_hostnames.0 }}</h5>
             {% for field in obj.router_forms.0 %}
             <div class='row form-group'>
-                <label class='col-4'>{{ field.label }}</label>
-                {{ field }}
+                <label class='col-5'>{{ field.label }}</label>
+                <div class='col-2 h6'>{{ field }}</div>
             </div>
             {% endfor %}
         </div>
@@ -16,8 +16,8 @@
             <h5 class='d-flex justify-content-center form-group mb-5'>Parameters for {{ obj.router_hostnames.1 }}</h5>
             {% for field in obj.router_forms.1 %}
             <div class='row form-group'>
-                <label class='col-4'>{{ field.label }}</label>
-                {{ field }}
+                <label class='col-5'>{{ field.label }}</label>
+                <div class='col-2 h6'>{{ field }}</div>
             </div>
             {% endfor %}
         </div>

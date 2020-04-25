@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<form class='ml-2 mt-4 mb-1' method="POST">{% csrf_token %}
+    {{ obj.formset.management_form }}
+    {% for form in obj.formset %}
+    <div class='row'>
+        {% for closet_field in form %}
+        {% if closet_field.label != 'Id' %}
+        {% if closet_field.label == 'Delete' %}
+        <label class="col mt-2 h6">Delete Record</label>
+        <div class='col ml-3 mt-2 h6'>{{ closet_field }}</div>
+        {% else %}
+        <label class="col col-form-label">{{ closet_field.label }}</label>
+        <div class='col mt-2 h6'>{{ closet_field }}</div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+    {{ form.id }}
+    {% endfor %}
+    <button type='submit' class='btn btn-outline-primary mt-2'>Save</button>
+</form>
+{% endblock content %}

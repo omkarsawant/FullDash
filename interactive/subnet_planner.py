@@ -34,3 +34,6 @@ class SubnetPlanner:
             self.supernet_breakdown.extend(remaining_supernet)
             self.supernet_breakdown.sort()
             return subnet
+
+    def exclude_subnet(self):
+        pass

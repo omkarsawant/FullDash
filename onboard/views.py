@@ -1,0 +1,55 @@
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from .forms import OnboardLookupForm, OnboardDetailForm
+from onboard.models import Site
+from interactive import base_system
+
+
+def onboarding_view(request, *args, **kwargs):
+    initial = dict()
+    obj = type('', (object,), {})()
+    template_name = 'onboard.html'
+    site_record = base_system.initialize_navbar(obj, request)
+    if request.method == 'GET':
+        obj.form = OnboardLookupForm()
+        obj.submit_type = 'btn-outline-primary'
+        obj.submit_text = 'Create Network'
+        return render(request, template_name, {'obj': obj})
+    if request.method == 'POST':
+        if 'navbar' in request.POST:
+            site_record_navbar = Site.objects.get(
+                network_name=request.POST['site'])
+            return redirect(reverse('overview', kwargs={'id': site_record_navbar.id}))
+        if 'capacity' in request.POST:
+            obj.form = OnboardDetailForm(request.POST)
+            if obj.form.is_valid():
+                cleaned_data = obj.form.cleaned_data
+                meeting_standards = base_system.check_hardware_standards(
+                    request, cleaned_data['crest'])
+                if (not meeting_standards) and ('confirm' not in request.POST):
+                    base_system.activate_modal(obj, 'NON_STANDARD')
+                    obj.submit_type = 'btn-outline-warning'
+                    obj.submit_name = 'confirm'
+                    obj.submit_text = 'Confirm Non-Standard Network'
+                    return render(request, template_name, {'obj': obj})
+                site_record = obj.form.save(commit=False)
+                site_record_number = len(
+                    Site.objects.filter(crest=site_record.crest)) + 1
+                site_record.network_name = f'{site_record.crest}--{site_record.address}--{site_record_number:03}'
+                site_record.save()
+                return redirect(reverse('closets', kwargs={'id': site_record.id}))
+            base_system.set_form_errors(request, obj.form)
+            return render(request, template_name, {'obj': obj})
+        else:
+            obj.form = OnboardLookupForm(request.POST)
+            if obj.form.is_valid():
+                # TODO: lookup site in form
+                initial.update(obj.form.cleaned_data)
+                initial.update(base_system.get_site_details(initial['crest']))
+                obj.form = OnboardDetailForm(initial=initial)
+                obj.submit_type = 'btn-outline-primary'
+                obj.submit_text = 'Create Network'
+                return render(request, template_name, {'obj': obj})
+            base_system.set_form_errors(request, obj.form)
+            return render(request, template_name, {'obj': obj})

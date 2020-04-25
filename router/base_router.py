@@ -1,6 +1,10 @@
 from .models import Router
 
 
+def get_brownfield_data(greenfield_data):
+    return None
+
+
 def make_model(closet):
     # TODO: finish the code!
     router_parameters = {

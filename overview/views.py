@@ -1,70 +1,54 @@
 from django.contrib import messages
-from django.forms.models import model_to_dict
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.views.generic import CreateView, UpdateView
+
+from .forms import ExcludedSubnetCreateFormset, OverviewForm, SupernetCreateFormset
+from .models import ExcludedSubnet, Supernet
 from interactive import base_system
-from .models import Overview
-from .forms import Navbar, OverviewCreateForm, OverviewUpdateForm
+from onboard.models import Site
 
 
-def overview_create_view(request, *args, **kwargs):
+def overview_view(request, *args, **kwargs):
     initial = dict()
     obj = type('', (object,), {})()
+    template_name = 'overview.html'
+    site_record = base_system.initialize_navbar(obj, request, kwargs['id'])
+    supernet_records = Supernet.objects.filter(site=site_record)
+    excluded_subnet_records = ExcludedSubnet.objects.filter(site=site_record)
     if request.method == 'GET':
-        obj.form = OverviewCreateForm(initial=initial)
-        return render(request, 'overview_create.html', {'obj': obj})
-    if request.method == 'POST':
-        obj.form = OverviewCreateForm(request.POST, initial=initial)
-        if obj.form.is_valid():
-            model = obj.form.save()
-            return redirect(reverse('overview_update', kwargs={'id': model.id}))
-        for error in obj.form.errors.values():
-            obj.message_type = 'danger'
-            messages.error(request, error)
-        return render(request, 'overview_create.html', {'obj': obj})
-
-
-def overview_update_view(request, *args, **kwargs):
-    initial = dict()
-    obj = type('', (object,), {})()
-    template_name = 'overview_update.html'
-    overview_record = base_system.initialize_navbar(obj, kwargs['id'])
-    initial.update(model_to_dict(overview_record))
-    if request.method == 'GET':
-        if not overview_record.capacity:
-            site_details = base_system.get_site_details(overview_record.crest)
-            for site_detail in site_details:
-                initial[site_detail] = site_details[site_detail]
-                exec('overview_record.' + site_detail +
-                     ' = site_details[site_detail]')
-            overview_record.save()
-        obj.form = OverviewUpdateForm(initial=initial)
-        obj.submit_type = 'btn-outline-primary'
-        obj.submit_text = 'Create Network'
+        obj.overview_form = OverviewForm(
+            instance=site_record, prefix='overview')
+        obj.supernet_formset = SupernetCreateFormset(
+            queryset=supernet_records, prefix='supernet')
+        obj.excluded_subnet_formset = ExcludedSubnetCreateFormset(
+            queryset=excluded_subnet_records, prefix='excluded_subnet')
         return render(request, template_name, {'obj': obj})
     if request.method == 'POST':
-        obj.form = OverviewUpdateForm(request.POST, instance=overview_record)
-        if obj.form.is_valid():
-            site_details = base_system.get_site_details(overview_record.crest)
-            meeting_standards = True
-            for site_detail in site_details:
-                if str(request.POST[site_detail]) != str(site_details[site_detail]):
-                    meeting_standards = False
-                    break
-            if not meeting_standards:
-                if overview_record.signal_exception is None:
-                    overview_record.signal_exception = False
-                    base_system.activate_modal(obj, 'NON_STANDARD')
-                    obj.submit_type = 'btn-outline-warning'
-                    obj.submit_text = 'Confirm Non-Standard Network'
-                    overview_record.save()
-                    return render(request, template_name, {'obj': obj})
-                elif overview_record.signal_exception is False:
-                    overview_record.signal_exception = True
-            obj.form.save()
-            return redirect(reverse('closets_create', kwargs={'id': kwargs['id']}))
-        for error in obj.form.errors.values():
-            obj.message_type = 'danger'
-            messages.error(request, error)
+        if 'navbar' in request.POST:
+            site_record_navbar = Site.objects.get(
+                network_name=request.POST['site'])
+            return redirect(reverse('overview', kwargs={'id': site_record_navbar.id}))
+        obj.overview_form = OverviewForm(
+            instance=site_record, prefix='overview')
+        obj.supernet_formset = SupernetCreateFormset(
+            request.POST, queryset=supernet_records, prefix='supernet')
+        obj.excluded_subnet_formset = ExcludedSubnetCreateFormset(
+            request.POST, queryset=excluded_subnet_records, prefix='excluded_subnet')
+        if obj.supernet_formset.is_valid() and obj.excluded_subnet_formset.is_valid():
+            supernet_instances = obj.supernet_formset.save(commit=False)
+            for supernet_instance in supernet_instances:
+                supernet_instance.site = site_record
+                supernet_instance.save()
+            for supernet_form in obj.supernet_formset.deleted_forms:
+                supernet_form.save(commit=False).delete()
+            excluded_subnet_instances = obj.excluded_subnet_formset.save(
+                commit=False)
+            for excluded_subnet_instance in excluded_subnet_instances:
+                excluded_subnet_instance.site = site_record
+                excluded_subnet_instance.save()
+            for excluded_subnet_form in obj.excluded_subnet_formset.deleted_forms:
+                excluded_subnet_form.save(commit=False).delete()
+            return redirect(reverse('overview', kwargs={'id': kwargs['id']}))
+        base_system.set_formset_errors(
+            request, obj.supernet_formset, obj.excluded_subnet_formset)
         return render(request, template_name, {'obj': obj})

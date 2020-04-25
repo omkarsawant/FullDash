@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from closets.models import Closets
+from closet.models import Closet
 
 
 class Router(models.Model):
@@ -39,27 +39,29 @@ class Router(models.Model):
         VODAPHONE = 'vodaphone', _('Vodafone')
         ZAYO = 'zayo', _('Zayo')
 
-    hostname = models.CharField(
-        'Router Hostname', max_length=19)  # model
-    loopback_ip = models.GenericIPAddressField(
-        'Loopback IP', protocol='IPv4', null=True)  # brownfield
+    hostname = models.CharField('Hostname', max_length=19)  # model
+    loopback_cidr = models.CharField(
+        'Loopback CIDR', max_length=18, blank=True, null=True)  # brownfield
     downlink_1_desc = models.CharField(
-        'Downlink 1 Description', max_length=37, null=True)  # model
-    downlink_1_ip = models.GenericIPAddressField(
-        'Downlink 1 IP', protocol='IPv4', null=True)  # brownfield
-    downlink_2_desc = models.CharField(max_length=37, null=True)  # model
-    downlink_2_ip = models.GenericIPAddressField(
-        'Downlink 1 IP', protocol='IPv4', null=True)  # brownfield
-    interlink_1_desc = models.CharField(max_length=37, null=True)  # model
-    interlink_1_ip = models.GenericIPAddressField(
-        'Interlink 1 IP', protocol='IPv4', null=True)  # brownfield
-    interlink_2_desc = models.CharField(max_length=37, null=True)  # model
-    interlink_2_ip = models.GenericIPAddressField(
-        'Interlink 1 IP', protocol='IPv4', null=True)  # brownfield
-    wan_type = models.CharField('WAN Type',
-                                choices=WanTypeChoices.choices, default=WanTypeChoices.MPLS, max_length=10, null=True)  # greenfield
-    wan_provider = models.CharField('WAN Provider',
-                                    choices=WanProviderChoices.choices, max_length=20, null=True)  # greenfield
+        'Downlink#1 Description', max_length=37, null=True)  # model
+    downlink_1_cidr = models.CharField(
+        'Downlink#1 CIDR', max_length=18, blank=True, null=True)  # brownfield
+    downlink_2_desc = models.CharField(
+        'Downlink#2 Description', max_length=37, null=True)  # model
+    downlink_2_cidr = models.CharField(
+        'Downlink#2 CIDR', max_length=18, blank=True, null=True)  # brownfield
+    interlink_1_desc = models.CharField(
+        'Interlink#1 Description', max_length=37, null=True)  # model
+    interlink_1_cidr = models.CharField(
+        'Interlink#1 CIDR', max_length=18, blank=True, null=True)  # brownfield
+    interlink_2_desc = models.CharField(
+        'Interlink#2 Description', max_length=37, null=True)  # model
+    interlink_2_cidr = models.CharField(
+        'Interlink#2 CIDR', max_length=18, blank=True, null=True)  # brownfield
+    wan_type = models.CharField('WAN Type', choices=WanTypeChoices.choices,
+                                default=WanTypeChoices.MPLS, max_length=10, null=True)  # greenfield
+    wan_provider = models.CharField(
+        'WAN Provider', choices=WanProviderChoices.choices, max_length=20, null=True)  # greenfield
     access_id = models.CharField(
         'Circuit Access ID', max_length=80, null=True)  # greenfield
     port_id = models.CharField(
@@ -68,18 +70,17 @@ class Router(models.Model):
         'Circuit Access Bandwidth', null=True)  # greenfield
     port_bw = models.IntegerField(
         'Circuit Port Bandwidth', null=True)  # greenfield
-    wan_ip = models.GenericIPAddressField(
-        'WAN Interface IP', protocol='IPv4', null=True)  # greenfield
+    wan_cidr = models.CharField(
+        'WAN CIDR', max_length=18, null=True)  # greenfield
     local_asn = models.IntegerField('Local BGP ASN', null=True)  # greenfield
     remote_asn = models.IntegerField('Remote BGP ASN', null=True)  # greenfield
-    other_router_loopback = models.GenericIPAddressField(
-        'Other Router Loopback', protocol='IPv4', null=True)  # brownfield
+    other_router_loopback_cidr = models.CharField(
+        'Other Router Loopback CIDR', max_length=18, blank=True, null=True)  # brownfield
     other_router_hostname = models.CharField(
         'Other Router Hostname', max_length=19, null=True)  # model
-    isp_ip = models.GenericIPAddressField(
-        'ISP IP', protocol='IPv4', null=True)  # brownfield
-    closet = models.ForeignKey(
-        Closets, on_delete=models.CASCADE, null=True)  # model
+    isp_cidr = models.CharField(
+        'ISP CIDR', max_length=18, blank=True, null=True)  # brownfield
+    closet = models.ForeignKey(Closet, on_delete=models.CASCADE)  # model
 
     '''
     ****programatically generated****
@@ -96,11 +97,3 @@ class Router(models.Model):
     wan_qos_policy
     community_string
     '''
-
-
-class Networks(models.Model):
-    subnet = models.GenericIPAddressField(
-        'Loopback IP', protocol='IPv4')  # greenfield
-    mask = models.GenericIPAddressField(
-        'Loopback IP', protocol='IPv4')  # greenfield
-    router = models.ForeignKey(Router, on_delete=models.CASCADE)  # model

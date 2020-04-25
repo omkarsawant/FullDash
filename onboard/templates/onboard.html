@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<form class='ml-2 mt-4 mb-1' method='POST'>{% csrf_token %}
+    {% for onboard_field in obj.form %}
+    <div class='row form-group'>
+        <label class="col-2 col-form-label">{{ onboard_field.label }}</label>
+        <div class='col-4 mt-2 h6'>{{ onboard_field }}</div>
+    </div>
+    {% endfor %}
+    <button type="submit" name='{{ obj.submit_name }}' class='btn {{ obj.submit_type }}'>{{ obj.submit_text }}</button>
+</form>
+{% endblock content %}

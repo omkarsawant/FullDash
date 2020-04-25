@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<form class='ml-2 mt-4 mb-1' method="POST">{% csrf_token %}
+    <h4 class='mt-4 mb-4'>Site Overview</h4>
+    {% for overview_field in obj.overview_form %}
+    <div class='row form-group'>
+        <label class="col-2 col-form-label">{{ overview_field.label }}</label>
+        <div class='col-4 mt-2 h6'>{{ overview_field }}</div>
+    </div>
+    {% endfor %}
+    <h4 class='mt-4 mb-4'>IP Scheme</h4>
+    <h5 class='mt-4 mb-2'>Site Supernets</h5>
+    {{ obj.supernet_formset.management_form }}
+    {% for supernet_form in obj.supernet_formset %}
+    <div class='row'>
+        {% for supernet_field in supernet_form %}
+        {% if supernet_field.label != 'Id' %}
+        {% if supernet_field.label == 'Delete' %}
+        <label class="mt-2 h6">Delete Record</label>
+        <div class='ml-3 mt-2 h6'>{{ supernet_field }}</div>
+        {% else %}
+        <label class="col-2 col-form-label">{{ supernet_field.label }}</label>
+        <div class='col-2 mt-2 h6'>{{ supernet_field }}</div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+    {{ supernet_form.id }}
+    {% endfor %}
+    <h5 class='mt-4 mb-2'>Excluded Subnets</h5>
+    {{ obj.excluded_subnet_formset.management_form }}
+    {% for excluded_subnet_form in obj.excluded_subnet_formset %}
+    <div class='row'>
+        {% for excluded_subnet_field in excluded_subnet_form %}
+        {% if excluded_subnet_field.label != 'Id' %}
+        {% if excluded_subnet_field.label == 'Delete' %}
+        <label class="mt-2 h6">Delete Record</label>
+        <div class='ml-3 mt-2 h6'>{{ excluded_subnet_field }}</div>
+        {% else %}
+        <label class="col-2 col-form-label">{{ excluded_subnet_field.label }}</label>
+        <div class='col-2 mt-2 h6'>{{ excluded_subnet_field }}</div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+    {{ excluded_subnet_form.id }}
+    {% endfor %}
+    <button type="submit" class='btn btn-outline-primary mt-4'>Save</button>
+</form>
+{% endblock content %}
