@@ -40,24 +40,24 @@ class Router(models.Model):
         ZAYO = 'zayo', _('Zayo')
 
     hostname = models.CharField('Hostname', max_length=19)  # model
-    loopback_cidr = models.CharField(
-        'Loopback CIDR', max_length=18, blank=True, null=True)  # brownfield
+    loopback_ip = models.CharField(
+        'Loopback IP', max_length=15, blank=True, null=True)  # brownfield
     downlink_1_desc = models.CharField(
         'Downlink#1 Description', max_length=37, null=True)  # model
-    downlink_1_cidr = models.CharField(
-        'Downlink#1 CIDR', max_length=18, blank=True, null=True)  # brownfield
+    downlink_1_ip = models.CharField(
+        'Downlink#1 IP', max_length=15, blank=True, null=True)  # brownfield
     downlink_2_desc = models.CharField(
         'Downlink#2 Description', max_length=37, null=True)  # model
-    downlink_2_cidr = models.CharField(
-        'Downlink#2 CIDR', max_length=18, blank=True, null=True)  # brownfield
+    downlink_2_ip = models.CharField(
+        'Downlink#2 IP', max_length=15, blank=True, null=True)  # brownfield
     interlink_1_desc = models.CharField(
         'Interlink#1 Description', max_length=37, null=True)  # model
-    interlink_1_cidr = models.CharField(
-        'Interlink#1 CIDR', max_length=18, blank=True, null=True)  # brownfield
+    interlink_1_ip = models.CharField(
+        'Interlink#1 IP', max_length=15, blank=True, null=True)  # brownfield
     interlink_2_desc = models.CharField(
         'Interlink#2 Description', max_length=37, null=True)  # model
-    interlink_2_cidr = models.CharField(
-        'Interlink#2 CIDR', max_length=18, blank=True, null=True)  # brownfield
+    interlink_2_ip = models.CharField(
+        'Interlink#2 IP', max_length=15, blank=True, null=True)  # brownfield
     wan_type = models.CharField('WAN Type', choices=WanTypeChoices.choices,
                                 default=WanTypeChoices.MPLS, max_length=10, null=True)  # greenfield
     wan_provider = models.CharField(
@@ -70,16 +70,16 @@ class Router(models.Model):
         'Circuit Access Bandwidth', null=True)  # greenfield
     port_bw = models.IntegerField(
         'Circuit Port Bandwidth', null=True)  # greenfield
-    wan_cidr = models.CharField(
-        'WAN CIDR', max_length=18, null=True)  # greenfield
+    wan_link_cidr = models.CharField(
+        'WAN Link CIDR', max_length=18, null=True)  # greenfield
     local_asn = models.IntegerField('Local BGP ASN', null=True)  # greenfield
     remote_asn = models.IntegerField('Remote BGP ASN', null=True)  # greenfield
-    other_router_loopback_cidr = models.CharField(
-        'Other Router Loopback CIDR', max_length=18, blank=True, null=True)  # brownfield
+    other_router_loopback_ip = models.CharField(
+        'Other Router Loopback IP', max_length=15, blank=True, null=True)  # brownfield
     other_router_hostname = models.CharField(
         'Other Router Hostname', max_length=19, null=True)  # model
-    isp_cidr = models.CharField(
-        'ISP CIDR', max_length=18, blank=True, null=True)  # brownfield
+    isp_ip = models.CharField(
+        'ISP IP', max_length=15, blank=True, null=True)  # brownfield
     closet = models.ForeignKey(Closet, on_delete=models.CASCADE)  # model
 
     '''

@@ -9,7 +9,7 @@ class ExcludedSubnetCreateForm(forms.ModelForm):
     class Meta:
         model = ExcludedSubnet
         fields = [
-            'subnet'
+            'subnet_cidr'
         ]
 
 
@@ -63,7 +63,7 @@ class SupernetCreateForm(forms.ModelForm):
     class Meta:
         model = Supernet
         fields = [
-            'supernet',
+            'supernet_cidr',
         ]
 
 

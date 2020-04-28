@@ -12,7 +12,8 @@ def overview_view(request, *args, **kwargs):
     initial = dict()
     obj = type('', (object,), {})()
     template_name = 'overview.html'
-    site_record = base_system.initialize_navbar(obj, request, kwargs['id'])
+    site_record = base_system.initialize_navbar(
+        obj, request, kwargs['site_id'])
     supernet_records = Supernet.objects.filter(site=site_record)
     excluded_subnet_records = ExcludedSubnet.objects.filter(site=site_record)
     if request.method == 'GET':
@@ -27,7 +28,7 @@ def overview_view(request, *args, **kwargs):
         if 'navbar' in request.POST:
             site_record_navbar = Site.objects.get(
                 network_name=request.POST['site'])
-            return redirect(reverse('overview', kwargs={'id': site_record_navbar.id}))
+            return redirect(reverse('overview', kwargs={'site_id': site_record_navbar.id}))
         obj.overview_form = OverviewForm(
             instance=site_record, prefix='overview')
         obj.supernet_formset = SupernetCreateFormset(
@@ -48,7 +49,7 @@ def overview_view(request, *args, **kwargs):
                 excluded_subnet_instance.save()
             for excluded_subnet_form in obj.excluded_subnet_formset.deleted_forms:
                 excluded_subnet_form.save(commit=False).delete()
-            return redirect(reverse('overview', kwargs={'id': kwargs['id']}))
+            return redirect(reverse('overview', kwargs={'site_id': site_record.id}))
         base_system.set_formset_errors(
             request, obj.supernet_formset, obj.excluded_subnet_formset)
         return render(request, template_name, {'obj': obj})

@@ -18,7 +18,8 @@ def wan_brown_view(request, *args, **kwargs):
     router_2_initial = dict()
     obj = type('', (object,), {})()
     template_name = 'wan_brown.html'
-    site_record = base_system.initialize_navbar(obj, request, kwargs['id'])
+    site_record = base_system.initialize_navbar(
+        obj, request, kwargs['site_id'])
     closet_records = Closet.objects.filter(site=site_record)
     mdf_closets = base_system.get_mdf_closets(closet_records)
     router_records = base_system.get_device_records(Router, mdf_closets)
@@ -42,7 +43,7 @@ def wan_brown_view(request, *args, **kwargs):
         if 'navbar' in request.POST:
             site_record_navbar = Site.objects.get(
                 network_name=request.POST['site'])
-            return redirect(reverse('overview', kwargs={'id': site_record_navbar.id}))
+            return redirect(reverse('overview', kwargs={'site_id': site_record_navbar.id}))
         router_1_form = WanBrownForm(request.POST, prefix='router_1')
         router_2_form = WanBrownForm(request.POST, prefix='router_2')
         if(router_1_form.is_valid() and router_2_form.is_valid()):
@@ -55,7 +56,8 @@ def wan_brown_view(request, *args, **kwargs):
 def wan_green_view(request, *args, **kwargs):
     obj = type('', (object,), {})()
     template_name = 'wan_green.html'
-    site_record = base_system.initialize_navbar(obj, request, kwargs['id'])
+    site_record = base_system.initialize_navbar(
+        obj, request, kwargs['site_id'])
     closet_records = Closet.objects.filter(site=site_record)
     mdf_closets = base_system.get_mdf_closets(closet_records)
     obj.router_hostnames = base_system.get_mdf_device_hostnames(
@@ -67,7 +69,7 @@ def wan_green_view(request, *args, **kwargs):
         if 'navbar' in request.POST:
             site_record_navbar = Site.objects.get(
                 network_name=request.POST['site'])
-            return redirect(reverse('overview', kwargs={'id': site_record_navbar.id}))
+            return redirect(reverse('overview', kwargs={'site_id': site_record_navbar.id}))
         wan_green_query_dict = dict(request.POST)
         router_1_query_dict = QueryDict(mutable=True)
         router_2_query_dict = QueryDict(mutable=True)
@@ -106,7 +108,8 @@ def wan_green_view(request, *args, **kwargs):
 
 def wan_landing_view(request, *args, **kwargs):
     obj = type('', (object,), {})()
-    site_record = base_system.initialize_navbar(obj, request, kwargs['id'])
+    site_record = base_system.initialize_navbar(
+        obj, request, kwargs['site_id'])
     closet_records = Closet.objects.filter(site=site_record)
     if not closet_records:
         base_system.generate_error(obj, 'NO_CLOSETS')
@@ -117,5 +120,5 @@ def wan_landing_view(request, *args, **kwargs):
         return render(request, 'error.html', {'obj': obj})
     router_records = base_system.get_device_records(Router, mdf_closets)
     if not router_records and site_record.project_type == Site.ProjectTypeChoices.GREENFIELD:
-        return redirect(reverse('wan_green', kwargs={'id': kwargs['id']}))
-    return redirect(reverse('wan_brown', kwargs={'id': kwargs['id']}))
+        return redirect(reverse('wan_green', kwargs={'site_id': site_record.id}))
+    return redirect(reverse('wan_brown', kwargs={'site_id': site_record.id}))

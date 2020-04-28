@@ -1,5 +1,7 @@
 from django.contrib import messages
+from django.db import models
 from random import randint
+from access.models import AccessSwitch
 from closet.models import Closet
 from onboard.models import Site
 from overview.forms import NavbarForm
@@ -9,6 +11,7 @@ ERROR_IMAGE_COUNT = 1
 HOSTNAME = 'r{device}{country}{crest:0>4}-{closet}-{instance:03}'
 
 MESSAGES = {
+    'ACCESS_CREATED': 'New access switch stack was initialized. Please specify the details below.',
     'ACCESS_UPDATED': '',
     'CORE_UPDATED': '',
     'SERVER_UPDATED': '',
@@ -42,6 +45,7 @@ PLACEHOLDERS = {
 
 DEVICE_TYPES = {
     Router: 'wan',
+    AccessSwitch: 'acc',
 }
 
 
@@ -67,21 +71,23 @@ def generate_error(obj, modal_key):
         str(randint(1, ERROR_IMAGE_COUNT)) + '.jpg'
 
 
-def get_device_hostname(site_record, closet, device, instance=None):
+def get_device_hostname(site_record, closet_record, device, instance=None):
     # TODO: define
     hostname_data = {
         'device': DEVICE_TYPES[device],
         'country': 'us',
         'crest': str(site_record.crest)[-4:],
-        'closet': '003a',
+        'closet': closet_record.closet,
         'instance': instance,
     }
     if not instance:
-        pass
+        hostname_data['instance'] = len(
+            device.objects.filter(closet=closet_record)) + 1
     return HOSTNAME.format(**hostname_data)
 
 
 def get_device_records(device, mdf_closets):
+    # TODO: make efficient
     device_records = device.objects.none()
     for mdf_closet in mdf_closets:
         device_records = device_records.union(
@@ -90,6 +96,7 @@ def get_device_records(device, mdf_closets):
 
 
 def get_mdf_closets(closet_records):
+    # TODO: make efficient
     mdf_closets = list()
     for closet_record in closet_records:
         if closet_record.category in [Closet.CategoryChoices.MDF, Closet.CategoryChoices.MDF_IDF]:
@@ -127,6 +134,9 @@ def initialize_navbar(obj, request, site_id=None):
     if site_id:
         site_record = Site.objects.get(id=site_id)
         obj.navbar = NavbarForm(initial={'site': site_record.network_name})
+        if site_record.signal_updated_access:
+            messages.success(request, MESSAGES['ACCESS_CREATED'])
+            site_record.signal_updated_access = False
         if site_record.signal_onboarded_site:
             messages.success(request, MESSAGES['SITE_ONBOARDED'])
             site_record.signal_onboarded_site = False

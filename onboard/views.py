@@ -20,7 +20,7 @@ def onboarding_view(request, *args, **kwargs):
         if 'navbar' in request.POST:
             site_record_navbar = Site.objects.get(
                 network_name=request.POST['site'])
-            return redirect(reverse('overview', kwargs={'id': site_record_navbar.id}))
+            return redirect(reverse('overview', kwargs={'site_id': site_record_navbar.id}))
         if 'capacity' in request.POST:
             obj.form = OnboardDetailForm(request.POST)
             if obj.form.is_valid():
@@ -39,7 +39,7 @@ def onboarding_view(request, *args, **kwargs):
                 site_record.network_name = f'{site_record.crest}--{site_record.address}--{site_record_number:03}'
                 site_record.signal_onboarded_site = True
                 site_record.save()
-                return redirect(reverse('closets', kwargs={'id': site_record.id}))
+                return redirect(reverse('closets', kwargs={'site_id': site_record.id}))
             base_system.set_form_errors(request, obj.form)
             return render(request, template_name, {'obj': obj})
         else:

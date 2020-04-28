@@ -61,6 +61,8 @@ class Site(models.Model):
     server = models.CharField(
         'Server Layer', choices=ServerChoices.choices, max_length=15)
     # signals
+    signal_created_access = models.BooleanField(
+        'Access Created', null=True)
     signal_exception_site = models.BooleanField(
         'Site Non-standard', null=True)
     signal_onboarded_site = models.BooleanField(
