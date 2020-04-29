@@ -1,11 +1,42 @@
 from django import forms
 
+from . import base_access
 from .models import AccessSwitch, AccessPortBlock, Vlan
 
 from closet.models import Closet
+from interactive import base_system
 
 
-class AccessSwitchCreateGreenForm(forms.ModelForm):
+class AccessSwitchBrownForm(forms.ModelForm):
+    class Meta:
+        model = AccessSwitch
+        fields = [
+            'stack_model',
+            'switch_count',
+            'mgig_count',
+            'loopback_ip',
+            'uplink_1_ip',
+            'uplink_2_ip',
+            'ap_count',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['stack_model'].widget.attrs['onchange'] = 'this.form.submit()'
+        self.fields['switch_count'].widget.attrs['onchange'] = 'this.form.submit()'
+        self.fields['switch_count'].widget.attrs['style'] = 'width:1in'
+        self.fields['mgig_count'].widget.attrs['onchange'] = 'this.form.submit()'
+        self.fields['mgig_count'].widget.attrs['style'] = 'width:1in'
+        self.fields['ap_count'].widget.attrs['style'] = 'width:1in'
+        mgig_count_choices = []
+        if kwargs['instance'].switch_count:
+            for index in range(kwargs['instance'].switch_count+1):
+                exec('mgig_count_choices.append((AccessSwitch.MgigSwitchCountChoices.MSC_' + str(
+                    index) + ', AccessSwitch.MgigSwitchCountChoices.MSC_' + str(index) + '.value))')
+        self.fields['mgig_count'].choices = mgig_count_choices
+
+
+class AccessSwitchGreenForm(forms.ModelForm):
     class Meta:
         model = AccessSwitch
         fields = [
@@ -20,22 +51,18 @@ class AccessSwitchCreateGreenForm(forms.ModelForm):
         self.fields['stack_model'].widget.attrs['onchange'] = 'this.form.submit()'
         self.fields['switch_count'].widget.attrs['onchange'] = 'this.form.submit()'
         self.fields['switch_count'].widget.attrs['style'] = 'width:1in'
+        self.fields['mgig_count'].widget.attrs['onchange'] = 'this.form.submit()'
         self.fields['mgig_count'].widget.attrs['style'] = 'width:1in'
         self.fields['ap_count'].widget.attrs['style'] = 'width:1in'
-        mgig_count_choices = [
-            (
-                AccessSwitch.MgigSwitchCountChoices.MSC_0,
-                AccessSwitch.MgigSwitchCountChoices.MSC_0.value
-            )
-        ]
+        mgig_count_choices = []
         if kwargs['instance'].switch_count:
-            for index in range(1, (kwargs['instance'].switch_count+1)):
+            for index in range(kwargs['instance'].switch_count+1):
                 exec('mgig_count_choices.append((AccessSwitch.MgigSwitchCountChoices.MSC_' + str(
                     index) + ', AccessSwitch.MgigSwitchCountChoices.MSC_' + str(index) + '.value))')
         self.fields['mgig_count'].choices = mgig_count_choices
 
 
-class AccessPortBlockCreateGreenForm(forms.ModelForm):
+class AccessPortBlockForm(forms.ModelForm):
     class Meta:
         model = AccessPortBlock
         fields = [
@@ -46,21 +73,44 @@ class AccessPortBlockCreateGreenForm(forms.ModelForm):
             'legacy_qos',
         ]
 
-    def __init__(self, *args, access_switch, **kwargs):
+    def __init__(self, *args, **kwargs):
+        self.access_switch = kwargs.pop('access_switch', None)
         super().__init__(*args, **kwargs)
-        vlan_records = Vlan.objects.filter(access_switch=access_switch)
+        if not self.access_switch:
+            return
+        vlan_records = Vlan.objects.filter(
+            access_switch=self.access_switch)
         all_vlan_ids = vlan_records.values_list('vlan_id')
         voice_vlan_ids = vlan_records.filter(
             vlan_type=Vlan.VlanTypeChoices.VOICE).values_list('vlan_id')
-        self.fields['access_vlan'].widget = forms.Select(
-            choices=[(vlan_id, vlan_id) for vlan_id in all_vlan_ids])
-        self.fields['voice_vlan'].widget = forms.Select(
-            choices=[(vlan_id, vlan_id) for vlan_id in voice_vlan_ids])
+        if all_vlan_ids and all_vlan_ids[0][0]:
+            self.fields['access_vlan'].widget = forms.Select(
+                choices=[(vlan_id_tuple[0], vlan_id_tuple[0])
+                         for vlan_id_tuple in all_vlan_ids])
+        if voice_vlan_ids and voice_vlan_ids[0][0]:
+            self.fields['voice_vlan'].widget = forms.Select(
+                choices=[(vlan_id_tuple[0], vlan_id_tuple[0])
+                         for vlan_id_tuple in voice_vlan_ids])
+        if self.access_switch.stack_model and self.access_switch.switch_count:
+            self.fields['start_intr'].widget = forms.Select(
+                choices=base_access.get_stack_port_names(self.access_switch))
+            self.fields['end_intr'].widget = forms.Select(
+                choices=base_access.get_stack_port_names(self.access_switch))
         self.fields['access_vlan'].widget.attrs['style'] = 'width:1in'
         self.fields['voice_vlan'].widget.attrs['style'] = 'width:1in'
+        self.fields['start_intr'].widget.attrs['class'] = 'selectpicker'
+        self.fields['start_intr'].widget.attrs['data-live-search'] = 'true'
+        self.fields['start_intr'].widget.attrs['data-width'] = '2in'
+        self.fields['start_intr'].widget.attrs['data-size'] = 4
+        self.fields['start_intr'].widget.attrs['data-style'] = 'btn-outline-light border-dark text-dark rounded-0'
+        self.fields['end_intr'].widget.attrs['class'] = 'selectpicker'
+        self.fields['end_intr'].widget.attrs['data-live-search'] = 'true'
+        self.fields['end_intr'].widget.attrs['data-width'] = '2in'
+        self.fields['end_intr'].widget.attrs['data-size'] = 4
+        self.fields['end_intr'].widget.attrs['data-style'] = 'btn-outline-light border-dark text-dark rounded-0'
 
 
-class AccessPortBlockCreateBaseModelFormset(forms.BaseModelFormSet):
+class AccessPortBlockBaseModelFormset(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         kwargs.pop('instance', None)
         super().__init__(*args, **kwargs)
@@ -70,8 +120,8 @@ class AccessPortBlockCreateBaseModelFormset(forms.BaseModelFormSet):
         return super()._should_delete_form(form)
 
 
-AccessPortBlockCreateGreenFormSet = forms.modelformset_factory(
-    AccessPortBlock, can_delete=True, extra=1, form=AccessPortBlockCreateGreenForm, formset=AccessPortBlockCreateBaseModelFormset)
+AccessPortBlockFormSet = forms.modelformset_factory(
+    AccessPortBlock, can_delete=True, extra=1, form=AccessPortBlockForm, formset=AccessPortBlockBaseModelFormset)
 
 
 class AccessListingForm(forms.Form):
@@ -85,7 +135,28 @@ class AccessListingForm(forms.Form):
         queryset=Closet.objects.none(), empty_label=None)
 
 
-class VlanCreateGreenForm(forms.ModelForm):
+class VlanBrownForm(forms.ModelForm):
+    class Meta:
+        model = Vlan
+        fields = [
+            'vlan_type',
+            'vlan_id',
+            'name',
+            'svi_ip',
+            'svi_mask_length',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.access_switch = kwargs.pop('access_switch', None)
+        super().__init__(*args, **kwargs)
+        self.fields['vlan_type'].widget.attrs['onchange'] = 'this.form.submit()'
+        self.fields['vlan_id'].widget.attrs['style'] = 'width:0.5in'
+        self.fields['name'].widget.attrs['style'] = 'width:1.75in'
+        self.fields['svi_ip'].widget.attrs['style'] = 'width:1.5in'
+        self.fields['svi_mask_length'].widget.attrs['onchange'] = 'this.form.submit()'
+
+
+class VlanGreenForm(forms.ModelForm):
     class Meta:
         model = Vlan
         fields = [
@@ -95,6 +166,7 @@ class VlanCreateGreenForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
+        self.access_switch = kwargs.pop('access_switch', None)
         super().__init__(*args, **kwargs)
         self.fields['vlan_id'].widget.attrs.update(readonly=True)
         self.fields['vlan_id'].widget.attrs.update(placeholder='Autogen')
@@ -103,7 +175,7 @@ class VlanCreateGreenForm(forms.ModelForm):
         self.fields['svi_mask_length'].widget.attrs['onchange'] = 'this.form.submit()'
 
 
-class VlanCreateBaseModelFormset(forms.BaseModelFormSet):
+class VlanBaseModelFormset(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         kwargs.pop('instance', None)
         super().__init__(*args, **kwargs)
@@ -113,5 +185,8 @@ class VlanCreateBaseModelFormset(forms.BaseModelFormSet):
         return super()._should_delete_form(form)
 
 
-VlanCreateGreenFormset = forms.modelformset_factory(
-    Vlan, can_delete=True, extra=1, form=VlanCreateGreenForm, formset=VlanCreateBaseModelFormset)
+VlanBrownFormset = forms.modelformset_factory(
+    Vlan, can_delete=True, extra=1, form=VlanBrownForm, formset=VlanBaseModelFormset)
+
+VlanGreenFormset = forms.modelformset_factory(
+    Vlan, can_delete=True, extra=1, form=VlanGreenForm, formset=VlanBaseModelFormset)

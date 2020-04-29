@@ -14,6 +14,7 @@ MESSAGES = {
     'ACCESS_CREATED': 'New access switch stack was initialized. Please specify the details below.',
     'ACCESS_UPDATED': '',
     'CORE_UPDATED': '',
+    'DUPLICATE_VLAN': 'Only one security and voice server VLAN permitted.',
     'SERVER_UPDATED': '',
     'SITE_ONBOARDED': 'Site was successfully onboarded. Please create network closets below.',
     'WAN_UPDATED': '',
@@ -134,6 +135,9 @@ def initialize_navbar(obj, request, site_id=None):
     if site_id:
         site_record = Site.objects.get(id=site_id)
         obj.navbar = NavbarForm(initial={'site': site_record.network_name})
+        if site_record.signal_duplicate_vlan:
+            messages.error(request, MESSAGES['DUPLICATE_VLAN'])
+            site_record.signal_duplicate_vlan = False
         if site_record.signal_updated_access:
             messages.success(request, MESSAGES['ACCESS_CREATED'])
             site_record.signal_updated_access = False

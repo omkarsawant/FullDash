@@ -64,6 +64,8 @@ class Site(models.Model):
     # model signals
     signal_created_access = models.BooleanField(
         'Access Created', null=True)  # signal
+    signal_duplicate_vlan = models.BooleanField(
+        'Duplicate VLAN', null=True)  # signal
     signal_exception_site = models.BooleanField(
         'Site Non-standard', null=True)  # signal
     signal_onboarded_site = models.BooleanField(

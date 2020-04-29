@@ -37,7 +37,7 @@ class AccessSwitch(models.Model):
     switch_count = models.IntegerField(
         'Total Switch#', choices=SwitchCountChoices.choices, blank=True, null=True)  # greenfield_dynamic
     mgig_count = models.IntegerField(
-        'MGig Switch#', choices=MgigSwitchCountChoices.choices, default=MgigSwitchCountChoices.MSC_0, blank=True, null=True)  # greenfield_dynamic
+        'MGig Switch#', choices=MgigSwitchCountChoices.choices, blank=True, null=True)  # greenfield_dynamic
     loopback_ip = models.CharField(
         'Loopback IP', max_length=15, blank=True, null=True)  # brownfield_generated
     uplink_1_desc = models.CharField(
@@ -71,8 +71,10 @@ class AccessPortBlock(models.Model):
         'Start Interface', max_length=21)  # greenfield_static
     end_intr = models.CharField(
         'End Interface', max_length=21)  # greenfield_static
-    access_vlan = models.IntegerField('Access VLAN')  # greenfield_static
-    voice_vlan = models.IntegerField('Voice VLAN')  # greenfield_static
+    access_vlan = models.IntegerField(
+        'Access VLAN')  # greenfield_static
+    voice_vlan = models.IntegerField(
+        'Voice VLAN')  # greenfield_static
     legacy_qos = models.BooleanField(
         'Apply Legacy QoS', default=False)  # greenfield_static
     access_switch = models.ForeignKey(
