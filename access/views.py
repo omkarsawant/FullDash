@@ -5,8 +5,9 @@ from closet.models import Closet
 from interactive import base_system
 from onboard.models import Site
 
+from . import base_access
 from .forms import AccessSwitchCreateGreenForm, AccessPortBlockCreateGreenFormSet, AccessListingForm, VlanCreateGreenFormset
-from .models import AccessSwitch
+from .models import AccessSwitch, AccessPortBlock, Vlan
 
 
 def access_brown_view(request, *args, **kwargs):
@@ -19,15 +20,18 @@ def access_green_view(request, *args, **kwargs):
     template_name = 'access_green.html'
     site_record = base_system.initialize_navbar(
         obj, request, kwargs['site_id'])
-    obj.access_switch_record = AccessSwitch.objects.filter(
+    obj.access_switch_record = AccessSwitch.objects.get(
         id=kwargs['access_switch_id'])
+    vlan_records = Vlan.objects.filter(access_switch=obj.access_switch_record)
+    access_port_block_records = AccessPortBlock.objects.filter(
+        access_switch=obj.access_switch_record)
     if request.method == 'GET':
         obj.access_switch_form = AccessSwitchCreateGreenForm(
-            instance=obj.access_switch_record[0], prefix='access_switch')
+            instance=obj.access_switch_record, prefix='access_switch')
         obj.vlan_formset = VlanCreateGreenFormset(
-            queryset=obj.access_switch_record, prefix='vlan')
+            queryset=vlan_records, prefix='vlan')
         obj.access_port_block_formset = AccessPortBlockCreateGreenFormSet(
-            queryset=obj.access_switch_record, prefix='access_port_block')
+            queryset=access_port_block_records, form_kwargs={'access_switch': obj.access_switch_record}, prefix='access_port_block')
         return render(request, template_name, {'obj': obj})
     if request.method == 'POST':
         if 'navbar' in request.POST:
@@ -35,18 +39,18 @@ def access_green_view(request, *args, **kwargs):
                 network_name=request.POST['site'])
             return redirect(reverse('overview', kwargs={'site_id': site_record_navbar.id}))
         obj.access_switch_form = AccessSwitchCreateGreenForm(
-            request.POST, instance=obj.access_switch_record[0], prefix='access_switch')
+            request.POST, instance=obj.access_switch_record, prefix='access_switch')
         obj.vlan_formset = VlanCreateGreenFormset(
-            request.POST, queryset=obj.access_switch_record, prefix='vlan')
+            request.POST, queryset=vlan_records, prefix='vlan')
         obj.access_port_block_formset = AccessPortBlockCreateGreenFormSet(
-            request.POST, queryset=obj.access_switch_record, prefix='access_port_block')
+            request.POST, queryset=access_port_block_records, form_kwargs={'access_switch': obj.access_switch_record}, prefix='access_port_block')
         if obj.access_switch_form.is_valid():
-            print(obj.access_switch_form.cleaned_data)
             obj.access_switch_form.save()
         if obj.vlan_formset.is_valid():
             vlan_instances = obj.vlan_formset.save(commit=False)
             for vlan_instance in vlan_instances:
-                vlan_instance.site = site_record
+                vlan_instance.access_switch = obj.access_switch_record
+                # vlan_instance.vlan_id, vlan_instance.name = base_access.get_vlan_id()
                 vlan_instance.save()
             for vlan_form in obj.vlan_formset.deleted_forms:
                 vlan_form.save(commit=False).delete()
@@ -54,13 +58,13 @@ def access_green_view(request, *args, **kwargs):
             access_port_block_instances = obj.access_port_block_formset.save(
                 commit=False)
             for access_port_block_instance in access_port_block_instances:
-                access_port_block_instance.site = site_record
+                access_port_block_instance.access_switch = obj.access_switch_record
                 access_port_block_instance.save()
             for access_port_block_form in obj.access_port_block_formset.deleted_forms:
                 access_port_block_form.save(commit=False).delete()
         if 'finish' in request.POST:
             return redirect(reverse('access_lising', kwargs={'site_id': site_record.id}))
-        return redirect(reverse('access_green', kwargs={'site_id': site_record.id, 'access_switch_id': obj.access_switch_record[0].id}))
+        return redirect(reverse('access_green', kwargs={'site_id': site_record.id, 'access_switch_id': obj.access_switch_record.id}))
 
 
 def access_listing_view(request, *args, **kwargs):

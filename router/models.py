@@ -39,48 +39,51 @@ class Router(models.Model):
         VODAPHONE = 'vodaphone', _('Vodafone')
         ZAYO = 'zayo', _('Zayo')
 
-    hostname = models.CharField('Hostname', max_length=19)  # model
+    hostname = models.CharField('Hostname', max_length=19)  # model_anchor
     loopback_ip = models.CharField(
-        'Loopback IP', max_length=15, blank=True, null=True)  # brownfield
+        'Loopback IP', max_length=15, blank=True, null=True)  # brownfield_generated
     downlink_1_desc = models.CharField(
-        'Downlink#1 Description', max_length=37, null=True)  # model
+        'Downlink#1 Description', max_length=37, null=True)  # model_generated
     downlink_1_ip = models.CharField(
-        'Downlink#1 IP', max_length=15, blank=True, null=True)  # brownfield
+        'Downlink#1 IP', max_length=15, blank=True, null=True)  # brownfield_generated
     downlink_2_desc = models.CharField(
-        'Downlink#2 Description', max_length=37, null=True)  # model
+        'Downlink#2 Description', max_length=37, null=True)  # model_generated
     downlink_2_ip = models.CharField(
-        'Downlink#2 IP', max_length=15, blank=True, null=True)  # brownfield
+        'Downlink#2 IP', max_length=15, blank=True, null=True)  # brownfield_generated
     interlink_1_desc = models.CharField(
-        'Interlink#1 Description', max_length=37, null=True)  # model
+        'Interlink#1 Description', max_length=37, null=True)  # model_generated
     interlink_1_ip = models.CharField(
-        'Interlink#1 IP', max_length=15, blank=True, null=True)  # brownfield
+        'Interlink#1 IP', max_length=15, blank=True, null=True)  # brownfield_generated
     interlink_2_desc = models.CharField(
-        'Interlink#2 Description', max_length=37, null=True)  # model
+        'Interlink#2 Description', max_length=37, null=True)  # model_generated
     interlink_2_ip = models.CharField(
-        'Interlink#2 IP', max_length=15, blank=True, null=True)  # brownfield
+        'Interlink#2 IP', max_length=15, blank=True, null=True)  # brownfield_generated
     wan_type = models.CharField('WAN Type', choices=WanTypeChoices.choices,
-                                default=WanTypeChoices.MPLS, max_length=10, null=True)  # greenfield
+                                default=WanTypeChoices.MPLS, max_length=10)  # greenfield_static
     wan_provider = models.CharField(
-        'WAN Provider', choices=WanProviderChoices.choices, max_length=20, null=True)  # greenfield
+        'WAN Provider', choices=WanProviderChoices.choices, max_length=20)  # greenfield_static
     access_id = models.CharField(
-        'Circuit Access ID', max_length=80, null=True)  # greenfield
+        'Circuit Access ID', max_length=80)  # greenfield_static
     port_id = models.CharField(
-        'Circuit Port ID', max_length=80, null=True)  # greenfield
+        'Circuit Port ID', max_length=80)  # greenfield_static
     access_bw = models.IntegerField(
-        'Circuit Access Bandwidth', null=True)  # greenfield
+        'Circuit Access Bandwidth')  # greenfield_static
     port_bw = models.IntegerField(
-        'Circuit Port Bandwidth', null=True)  # greenfield
+        'Circuit Port Bandwidth')  # greenfield_static
     wan_link_cidr = models.CharField(
-        'WAN Link CIDR', max_length=18, null=True)  # greenfield
-    local_asn = models.IntegerField('Local BGP ASN', null=True)  # greenfield
-    remote_asn = models.IntegerField('Remote BGP ASN', null=True)  # greenfield
+        'WAN Link CIDR', max_length=18)  # greenfield_static
+    local_asn = models.IntegerField(
+        'Local BGP ASN')  # greenfield_static
+    remote_asn = models.IntegerField(
+        'Remote BGP ASN')  # greenfield_static
     other_router_loopback_ip = models.CharField(
-        'Other Router Loopback IP', max_length=15, blank=True, null=True)  # brownfield
+        'Other Router Loopback IP', max_length=15, blank=True, null=True)  # brownfield_generated
     other_router_hostname = models.CharField(
-        'Other Router Hostname', max_length=19, null=True)  # model
+        'Other Router Hostname', max_length=19, null=True)  # model_generated
     isp_ip = models.CharField(
-        'ISP IP', max_length=15, blank=True, null=True)  # brownfield
-    closet = models.ForeignKey(Closet, on_delete=models.CASCADE)  # model
+        'ISP IP', max_length=15, blank=True, null=True)  # brownfield_generated
+    closet = models.ForeignKey(
+        Closet, on_delete=models.CASCADE)  # model_anchor
 
     '''
     ****programatically generated****

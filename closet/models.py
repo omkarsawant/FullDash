@@ -9,8 +9,9 @@ class Closet(models.Model):
         MDF = 'mdf', _('MDF')
         MDF_IDF = 'mdf_idf', _('MDF & IDF')
 
-    floor = models.IntegerField('Floor')
+    floor = models.IntegerField('Floor')  # greenfield_static
     category = models.CharField('Closet Type', max_length=9,
-                                choices=CategoryChoices.choices, default=CategoryChoices.IDF)
-    closet = models.CharField('Closet', max_length=4, blank=True)
-    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+                                choices=CategoryChoices.choices, default=CategoryChoices.IDF)  # greenfield_static
+    closet = models.CharField('Closet', max_length=4,
+                              blank=True)  # brownfield_anchor_displayed
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)  # model_anchor

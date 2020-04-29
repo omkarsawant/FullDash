@@ -2,7 +2,7 @@
 {% block content %}
 <form class='ml-2 mt-4 mb-1' method="POST">{% csrf_token %}
     <h4 class='mt-4 mb-4'>Access Switch Stack Onboarding Form</h4>
-    <h5 class='mt-4 mb-2'>Parameters for {{ obj.access_switch_record.0.hostname }}</h5>
+    <h5 class='mt-4 mb-2'>Parameters for {{ obj.access_switch_record.hostname }}</h5>
     <div class='row ml-1'>
         <label class='col-2 col-form-label'>{{ obj.access_switch_form.stack_model.label }}</label>
         <div class='col-auto mt-2 h6'>{{ obj.access_switch_form.stack_model }}</div>
@@ -15,24 +15,40 @@
         <label class='col-2 col-form-label'>{{ obj.access_switch_form.mgig_count.label }}</label>
         <div class='col-auto mt-2 h6'>{{ obj.access_switch_form.mgig_count }}</div>
     </div>
+    <div class='row ml-1'>
+        <label class='col-2 col-form-label'>{{ obj.access_switch_form.ap_count.label }}</label>
+        <div class='col-auto mt-2 h6'>{{ obj.access_switch_form.ap_count }}</div>
+    </div>
     <h6 class='mt-4 mb-2'>VLANs</h6>
     {{ obj.vlan_formset.management_form }}
-    {% for access_port_block_form in obj.vlan_formset %}
+    {% for vlan_form in obj.vlan_formset %}
     <div class='row form-group ml-1'>
         <div class='col-auto'>
             <div class='form-row'>
-                <label class='mt-3'>{{ access_port_block_form.vlan_type.label }}</label>
-                <div class='h6 ml-3 mt-3'>{{ access_port_block_form.vlan_type }}</div>
+                <label class='mt-3'>{{ vlan_form.vlan_type.label }}</label>
+                <div class='h6 ml-3 mt-3'>{{ vlan_form.vlan_type }}</div>
             </div>
         </div>
         <div class='col-auto'>
             <div class='form-row'>
-                <label class='mt-3'>{{ access_port_block_form.svi_mask_length.label }}</label>
-                <div class='h6 ml-3 mt-3'>{{ access_port_block_form.svi_mask_length }}</div>
+                <label class='mt-3'>{{ vlan_form.svi_mask_length.label }}</label>
+                <div class='h6 ml-3 mt-3'>{{ vlan_form.svi_mask_length }}</div>
+            </div>
+        </div>
+        <div class='col-auto'>
+            <div class='form-row'>
+                <label class='mt-3'>{{ vlan_form.vlan_id.label }}</label>
+                <div class='h6 ml-3 mt-3'>{{ vlan_form.vlan_id }}</div>
+            </div>
+        </div>
+        <div class='col-auto'>
+            <div class='form-row'>
+                <label class="mt-3 h6">Delete</label>
+                <div class='h6 ml-3 mt-3'>{{ vlan_form.DELETE }}</div>
             </div>
         </div>
     </div>
-    {{ access_port_block_form.id }}
+    {{ vlan_form.id }}
     {% endfor %}
     <h6 class='mt-4 mb-2'>Access Port Blocks</h6>
     {{ obj.access_port_block_formset.management_form }}
@@ -76,6 +92,6 @@
     {{ access_port_block_form.id }}
     {% endfor %}
     <button type="submit" class='btn btn-outline-primary mt-4 inline-block'>Commit</button>
-    <button type="submit" name='finish' class='btn btn-outline-primary mt-4 inline-block'>Finish Up</button>
+    <button type="submit" name='finish' class='btn btn-outline-success mt-4 inline-block'>Finish Up</button>
 </form>
 {% endblock content %}

@@ -40,42 +40,43 @@ class Site(models.Model):
         CATALYST_4500 = 'catalyst_4500', _('Catalyst 4500')
         CATALYST_9500 = 'catalyst_9500', _('Catalyst 9500')
 
-    crest = models.IntegerField('CREST ID')
+    crest = models.IntegerField('CREST ID')  # greenfield_static
     project_type = models.CharField('Projet Type',
-                                    choices=ProjectTypeChoices.choices, default=ProjectTypeChoices.GREENFIELD, max_length=10)
-    network_name = models.CharField('Network Name', max_length=96)
+                                    choices=ProjectTypeChoices.choices, default=ProjectTypeChoices.GREENFIELD, max_length=10)  # greenfield_static
+    network_name = models.CharField(
+        'Network Name', max_length=96)  # model_anchor
     address = models.CharField(
-        'Site Address', max_length=96)
+        'Site Address', max_length=96)  # model_anchor
     capacity = models.IntegerField(
-        'Site Capacity')
+        'Site Capacity')  # model_anchor
     headcount = models.IntegerField(
-        'Site Headcount')
+        'Site Headcount')  # model_anchor
     network_type = models.CharField(
-        'Network Type', choices=NetworkTypeChoices.choices, default=NetworkTypeChoices.MICRO_BRANCH, max_length=27)
+        'Network Type', choices=NetworkTypeChoices.choices, default=NetworkTypeChoices.MICRO_BRANCH, max_length=27)  # model_anchor
     nearest_dc = models.CharField('Nearest DC',
-                                  choices=NearestDcChoices.choices, max_length=4)
+                                  choices=NearestDcChoices.choices, max_length=4)  # model_anchor
     router = models.CharField(
-        'Router Layer', choices=RouterChoices.choices, max_length=11)
+        'Router Layer', choices=RouterChoices.choices, max_length=11)  # brownfield_anchor
     core = models.CharField(
-        'Core Layer', choices=CoreChoices.choices, max_length=13)
+        'Core Layer', choices=CoreChoices.choices, max_length=13)  # brownfield_anchor
     server = models.CharField(
-        'Server Layer', choices=ServerChoices.choices, max_length=15)
-    # signals
+        'Server Layer', choices=ServerChoices.choices, max_length=15)  # brownfield_anchor
+    # model signals
     signal_created_access = models.BooleanField(
-        'Access Created', null=True)
+        'Access Created', null=True)  # signal
     signal_exception_site = models.BooleanField(
-        'Site Non-standard', null=True)
+        'Site Non-standard', null=True)  # signal
     signal_onboarded_site = models.BooleanField(
-        'Site Onboarded', null=True)
+        'Site Onboarded', null=True)  # signal
     signal_present_core = models.BooleanField(
-        'Core Present', null=True)
+        'Core Present', null=True)  # signal
     signal_present_server = models.BooleanField(
-        'Server Present', null=True)
+        'Server Present', null=True)  # signal
     signal_updated_access = models.BooleanField(
-        'Access Updated', null=True)
+        'Access Updated', null=True)  # signal
     signal_updated_core = models.BooleanField(
-        'Core Updated', null=True)
+        'Core Updated', null=True)  # signal
     signal_updated_server = models.BooleanField(
-        'Server Updated', null=True)
+        'Server Updated', null=True)  # signal
     signal_updated_wan = models.BooleanField(
-        'WAN Updated', null=True)
+        'WAN Updated', null=True)  # signal
