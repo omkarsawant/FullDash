@@ -1,5 +1,5 @@
 from zipfile import ZipFile
-import xml.etree.ElementTree as ET
+import win32com.client
 
 zip_in = ZipFile(
     'C:/Users/Omi/Documents/Projects/FullDash/static/diagrams/Drawing1.vsdx', 'r')
