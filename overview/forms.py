@@ -5,12 +5,30 @@ from interactive import base_system
 from onboard.models import Site
 
 
+class BuildForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['diagram_author'].widget.attrs['class'] = 'border border-secondary rounded'
+        self.fields['build_output'].widget = forms.Textarea()
+        self.fields['build_output'].widget.attrs['class'] = 'border border-secondary rounded w-100'
+        self.fields['build_output'].widget.attrs['rows'] = 10
+        self.fields['build_output'].widget.attrs['readonly'] = True
+
+    diagram_author = forms.CharField(label='Diagram Author')
+    build_output = forms.CharField(label='Build Output')
+
+
 class ExcludedSubnetCreateForm(forms.ModelForm):
     class Meta:
         model = ExcludedSubnet
         fields = [
             'subnet_cidr'
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_key in self.fields:
+            self.fields[field_key].widget.attrs['class'] = 'border border-secondary rounded'
 
 
 class ExcludedSubnetCreateBaseModelFormset(forms.BaseModelFormSet):
@@ -55,6 +73,7 @@ class OverviewForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_key in self.fields:
+            self.fields[field_key].widget.attrs['class'] = 'border border-secondary rounded'
             self.fields[field_key].widget.attrs['disabled'] = True
         self.fields['network_name'].widget.attrs['size'] = 64
 
@@ -65,6 +84,11 @@ class SupernetCreateForm(forms.ModelForm):
         fields = [
             'supernet_cidr',
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_key in self.fields:
+            self.fields[field_key].widget.attrs['class'] = 'border border-secondary rounded'
 
 
 class SupernetCreateBaseModelFormset(forms.BaseModelFormSet):

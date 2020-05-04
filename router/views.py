@@ -8,7 +8,6 @@ from closet.models import Closet
 from interactive import base_system
 from onboard.models import Site
 
-from . import base_router
 from .forms import WanBrownForm, WanGreenForm
 from .models import Router
 

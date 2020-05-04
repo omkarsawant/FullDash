@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<form class='ml-2 mt-4 mb-1' method='POST'>{% csrf_token %}
+    <div class='form-row'>
+        <div class='h4 ml-1'>Build Site Documents</div>
+        <button type='submit' name='all' class='btn btn-outline-success ml-2'>Build All</button>
+    </div>
+    <h5 class='mt-4 mb-2'>IP Scheme</h5>
+    <div class='form-row ml-2'>
+        <button type='submit' name='subnet' class='btn btn-outline-primary mt-4'>Assign IPs</button>
+    </div>
+    <h5 class='mt-4 mb-2'>Configurations and Diagram</h5>
+    <div class='form-row ml-2'>
+        <button type='submit' name='config' class='btn btn-outline-primary mt-4'>Build
+            Configurations</button>
+    </div>
+    <div class='form-row ml-2'>
+        <label class='col-auto mt-4'>{{ obj.build_form.diagram_author.label }}</label>
+        <div class='col-auto mt-4 h6'>{{ obj.build_form.diagram_author }}</div>
+        <button type='submit' name='diagram' class='btn btn-outline-primary mt-3 ml-2'>Build Diagram</button>
+    </div>
+    <br>
+    <h5 class='mt-4 mb-2'>{{ obj.build_form.build_output.label }}</h5>
+    {{ obj.build_form.build_output }}
+</form>
+{% endblock content %}

@@ -2,10 +2,33 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from .forms import ExcludedSubnetCreateFormset, OverviewForm, SupernetCreateFormset
+from .forms import BuildForm, ExcludedSubnetCreateFormset, OverviewForm, SupernetCreateFormset
 from .models import ExcludedSubnet, Supernet
-from interactive import base_system
+from interactive import base_system, generate_docs
 from onboard.models import Site
+
+
+def build_view(request, *args, **kwargs):
+    obj = type('', (object,), {})()
+    template_name = 'build.html'
+    site_record = base_system.initialize_navbar(
+        obj, request, kwargs['site_id'])
+    if request.method == 'GET':
+        obj.build_form = BuildForm(initial={'build_output': 'Lol'})
+        return render(request, template_name, {'obj': obj})
+    if request.method == 'POST':
+        if 'navbar' in request.POST:
+            site_record_navbar = Site.objects.get(
+                network_name=request.POST['site'])
+            return redirect(reverse('overview', kwargs={'site_id': site_record_navbar.id}))
+        elif 'subnet' in request.POST:
+            generate_docs.generate_docs(site_record, 'subnet')
+        elif 'diagram' in request.POST:
+            generate_docs.generate_docs(site_record, 'diagram')
+        elif 'config' in request.POST:
+            generate_docs.generate_docs(site_record, 'config')
+        elif 'all' in request.POST:
+            generate_docs.generate_docs(site_record, 'all')
 
 
 def overview_view(request, *args, **kwargs):

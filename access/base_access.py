@@ -1,4 +1,121 @@
+from ipaddress import IPv4Interface, IPv4Network
+
 from .models import AccessSwitch, Vlan
+
+ACCESS_SWITCH_SPECS = {
+    'MGIG_STACK': {
+        'BASE_INTR': {
+            'catalyst_3850': 'Gig',
+            'catalyst_9300': 'TwoGig',
+        },
+        'MGIG_INTR': {
+            'catalyst_3850': 'TenGig',
+            'catalyst_9300': 'TenGig',
+        },
+        'UPLINK_INTRS': {
+            'SINGLE_SWITCH': ['TenGig1/1/3', 'TenGig1/1/4'],
+            'MULTIPLE_SWITCHES': ['TenGig1/1/4', 'TenGig2/1/4'],
+        },
+    },
+    'NMGIG_STACK': {
+        'BASE_INTR': {
+            'catalyst_3850': 'Gig',
+            'catalyst_9300': 'Gig',
+        },
+        'UPLINK_INTRS': {
+            'SINGLE_SWITCH': ['Gig1/1/3', 'Gig1/1/4'],
+            'MULTIPLE_SWITCHES': ['Gig1/1/4', 'Gig2/1/4'],
+        },
+    },
+}
+
+
+class AccessSwitchDevice:
+    def __init__(self, site_record, access_switch_record):
+        self.site_record = site_record
+        self.device_record = access_switch_record
+        self.access_switch_model = self.device_record.stack_model
+        self.vlan_records = Vlan.objects.filter(
+            access_switch=self.device_record)
+        self.required_prefixes = []
+        self.preconfigured_subnets = []
+        if self.device_record.mgig_count == 0:
+            self.mgig_stack = False
+            self.base_intr = ACCESS_SWITCH_SPECS['NMGIG_STACK']['BASE_INTR'][self.access_switch_model]
+            if self.device_record.switch_count == 1:
+                self.uplink_intrs = ACCESS_SWITCH_SPECS['NMGIG_STACK']['UPLINK_INTRS']['SINGLE_SWITCH']
+            else:
+                self.uplink_intrs = ACCESS_SWITCH_SPECS['NMGIG_STACK']['UPLINK_INTRS']['MULTIPLE_SWITCHES']
+        else:
+            self.mgig_stack = True
+            self.base_intr = ACCESS_SWITCH_SPECS['MGIG_STACK']['BASE_INTR'][self.access_switch_model]
+            self.mgig_intr = ACCESS_SWITCH_SPECS['MGIG_STACK']['MGIG_INTR'][self.access_switch_model]
+            if self.device_record.switch_count == 1:
+                self.uplink_intrs = ACCESS_SWITCH_SPECS['MGIG_STACK']['UPLINK_INTRS']['SINGLE_SWITCH']
+            else:
+                self.uplink_intrs = ACCESS_SWITCH_SPECS['MGIG_STACK']['UPLINK_INTRS']['MULTIPLE_SWITCHES']
+
+    def check_connection(self, local_ip, remote_ip, prefix_length):
+        if local_ip:
+            if remote_ip:
+                local_interface = IPv4Interface(f'{local_ip}/{prefix_length}')
+                local_network = local_interface.network
+                remote_interface = IPv4Interface(
+                    f'{remote_ip}/{prefix_length}')
+                if local_network == remote_interface.network and local_interface > remote_interface:
+                    self.preconfigured_subnets.append(local_network)
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            if remote_ip:
+                return False
+            else:
+                self.required_prefixes.append(prefix_length)
+                return True
+
+    def get_ip_requirements(self, uplink_type, *uplink_devices):
+        self.preconfigured_subnets = []
+        self.required_prefixes = [] if self.device_record.loopback_ip else [32]
+        if uplink_type == 'router_primary':
+            if not self.check_connection(self.device_record.uplink_1_ip, uplink_devices[0].device_record.downlink_1_ip, 31):
+                raise AttributeError('')  # TODO: get error from base_system
+            if not self.check_connection(self.device_record.uplink_2_ip, uplink_devices[1].device_record.downlink_1_ip, 31):
+                raise AttributeError('')  # TODO: get error from base_system
+        if uplink_type == 'router_secondary':
+            if not self.check_connection(self.device_record.uplink_1_ip, uplink_devices[0].device_record.downlink_2_ip, 31):
+                raise AttributeError('')  # TODO: get error from base_system
+            if not self.check_connection(self.device_record.uplink_2_ip, uplink_devices[1].device_record.downlink_2_ip, 31):
+                raise AttributeError('')  # TODO: get error from base_system
+        if uplink_type == 'core':
+            if not self.check_connection(self.device_record.uplink_1_ip, uplink_devices[0].device_record.downlink_ip, 31):
+                raise AttributeError('')  # TODO: get error from base_system
+            if not self.check_connection(self.device_record.uplink_2_ip, uplink_devices[1].device_record.downlink_ip, 31):
+                raise AttributeError('')  # TODO: get error from base_system
+        for vlan_record in self.vlan_records:
+            if vlan_record.svi_ip:
+                self.preconfigured_subnets.append(IPv4Network(
+                    f'{vlan_record.svi_ip}/{vlan_record.svi_mask_length[-2:]}', False))
+            else:
+                self.required_prefixes.append(
+                    int(vlan_record.svi_mask_length[-2:]))
+        return self.required_prefixes, self.preconfigured_subnets
+
+    def set_ips(self, assigned_subnets):
+        if not self.device_record.uplink_1_ip:
+            self.device_record.uplink_1_ip = str(
+                assigned_subnets[31].pop(0)[1])
+        if not self.device_record.uplink_2_ip:
+            self.device_record.uplink_2_ip = str(
+                assigned_subnets[31].pop(0)[1])
+        for vlan_record in self.vlan_records:
+            if not vlan_record.svi_ip:
+                vlan_record.svi_ip = str(
+                    assigned_subnets[int(vlan_record.svi_mask_length[-2:])].pop(0)[1])
+                vlan_record.save()
+        self.device_record.save()
 
 
 def get_vlan_id(site_record, vlan_instance):
