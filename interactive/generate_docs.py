@@ -69,7 +69,7 @@ def generate_docs(site_record, build_type):
         router_devices[0].make_connections(router_devices[1], access_devices)
     if build_type in ['config', 'all']':
         pass
-    if build_type in ['diagram', 'all']':
+    if build_type in ['diagram', 'all']:
         pass
 
 
