@@ -3,7 +3,7 @@ from ipaddress import IPv4Interface, IPv4Network
 from .models import Router
 
 ROUTER_SPECS = {
-    'isr_4451': {
+    'ISR 4451': {
         'WAN_INTR': [],
         'INTERLINK_INTRS': [],
         'DOWNLINK_INTRS': [],
@@ -108,7 +108,7 @@ class RouterDevice:
         self.device_record.save()
 
 
-def get_device_dict(router_record, key_prefix):
+def get_device_dict(router_record, secondary_router, key_prefix):
     device_dict = {}
     device_dict[key_prefix + '_HOSTNAME'] = router_record.hostname
     device_dict[key_prefix + '_LOOPBACK'] = router_record.loopback_ip
@@ -120,9 +120,6 @@ def get_device_dict(router_record, key_prefix):
         router_record.interlink_2_ip.split('.')[-1]
     device_dict[key_prefix + '_DN1'] = '.' + \
         router_record.downlink_1_ip.split('.')[-1]
-    if router_record.downlink_2_ip:
-        device_dict[key_prefix + '_DN2'] = '.' + \
-            router_record.downlink_2_ip.split('.')[-1]
     '''device_dict[key_prefix + '_ISP'] = '.' + \
         router_record.isp_ip.split('.')[-1]'''
     device_dict[key_prefix + '_ISP_NAME'] = router_record.wan_provider
@@ -130,4 +127,12 @@ def get_device_dict(router_record, key_prefix):
         '/' + router_record.port_id
     device_dict[key_prefix + '_ISP_SP'] = str(router_record.access_bw) + \
         'Mbps/' + str(router_record.port_bw) + 'Mbps'
+    if router_record.downlink_2_ip:
+        device_dict[key_prefix + '_DN2'] = '.' + \
+            router_record.downlink_2_ip.split('.')[-1]
+    if secondary_router:
+        device_dict[key_prefix + '_IN1_N'] = str(
+            IPv4Network(router_record.interlink_1_ip + '/31', False))
+        device_dict[key_prefix + '_IN2_N'] = str(
+            IPv4Network(router_record.interlink_2_ip + '/31', False))
     return device_dict

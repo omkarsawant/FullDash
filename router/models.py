@@ -5,39 +5,39 @@ from closet.models import Closet
 
 class Router(models.Model):
     class WanTypeChoices(models.TextChoices):
-        MPLS = 'mpls', _('MPLS')
-        P2P = 'p2p', _('Point-to-Point')
+        MPLS = 'MPLS', _('MPLS')
+        P2P = 'Point-to-Point', _('Point-to-Point')
 
     class WanProviderChoices(models.TextChoices):
-        ATT = 'att', _('AT&T')
-        BELLCANADA = 'bellcanada', _('Bell Canada')
-        CENTURYLINK = 'centurylink', _('Century Link')
-        CHINATELCOM = 'chinatelcom', _('China Telecom')
-        DEUTSCHETELEKOM = 'deutschetelekom', _('Deutsche Telekom')
-        EMBRATEL = 'embratel', _('Embratel')
-        FREE = 'free', _('Free')
-        GESTIONTELCOM = 'gestiontelcom', _('Gestion Telcom')
-        GLOBE = 'globe', _('Globe')
-        KDDI = 'kddi', _('KDDI')
-        KOREATELCOM = 'koreatelcom', _('Korea Telcom')
-        LEVEL3 = 'level3', _('Level3')
-        MCI = 'mci', _('MCI')
-        MXIS = 'mxis', _('MXIS')
-        NTTCOM = 'nttcom', _('NTTCOM')
-        ORANGE = 'orange', _('Orange')
-        PCCW = 'pccw', _('PCCW')
-        PLDT = 'pldt', _('PLDT')
-        SINGTEL = 'singtel', _('Singtel')
-        SOFTBANK = 'softbank', _('Softbank')
-        TATA = 'tata', _('Tata')
-        TELCOMARGENTINA = 'telcomargentina', _('Telcom Argentina')
-        TELCOMMALAYSIA = 'telcommalaysia', _('Telcom Malaysia')
-        TELEFONICA = 'telefonica', _('Telefonica')
-        TELSTRA = 'telstra', _('Telstra')
-        TELUS = 'telus', _('Telus')
-        VERIZON = 'verizon', _('Verizon')
-        VODAPHONE = 'vodaphone', _('Vodafone')
-        ZAYO = 'zayo', _('Zayo')
+        ATT = 'AT&T', _('AT&T')
+        BELLCANADA = 'Bell Canada', _('Bell Canada')
+        CENTURYLINK = 'Century Link', _('Century Link')
+        CHINATELCOM = 'China Telecom', _('China Telecom')
+        DEUTSCHETELEKOM = 'Deutsche Telekom', _('Deutsche Telekom')
+        EMBRATEL = 'Embratel', _('Embratel')
+        FREE = 'Free', _('Free')
+        GESTIONTELCOM = 'Gestion Telcom', _('Gestion Telcom')
+        GLOBE = 'Globe', _('Globe')
+        KDDI = 'KDDI', _('KDDI')
+        KOREATELCOM = 'Korea Telcom', _('Korea Telcom')
+        LEVEL3 = 'Level3', _('Level3')
+        MCI = 'MCI', _('MCI')
+        MXIS = 'MXIS', _('MXIS')
+        NTTCOM = 'NTTCOM', _('NTTCOM')
+        ORANGE = 'Orange', _('Orange')
+        PCCW = 'PCCW', _('PCCW')
+        PLDT = 'PLDT', _('PLDT')
+        SINGTEL = 'Singtel', _('Singtel')
+        SOFTBANK = 'Softbank', _('Softbank')
+        TATA = 'Tata', _('Tata')
+        TELCOMARGENTINA = 'Telcom Argentina', _('Telcom Argentina')
+        TELCOMMALAYSIA = 'Telcom Malaysia', _('Telcom Malaysia')
+        TELEFONICA = 'Telefonica', _('Telefonica')
+        TELSTRA = 'Telstra', _('Telstra')
+        TELUS = 'Telus', _('Telus')
+        VERIZON = 'Verizon', _('Verizon')
+        VODAFONE = 'Vodafone', _('Vodafone')
+        ZAYO = 'Zayo', _('Zayo')
 
     hostname = models.CharField('Hostname', max_length=19)  # model_anchor
     loopback_ip = models.CharField(
@@ -59,7 +59,7 @@ class Router(models.Model):
     interlink_2_ip = models.CharField(
         'Interlink#2 IP', max_length=15, blank=True, null=True)  # brownfield_generated
     wan_type = models.CharField('WAN Type', choices=WanTypeChoices.choices,
-                                default=WanTypeChoices.MPLS, max_length=10)  # greenfield_static
+                                default=WanTypeChoices.MPLS, max_length=14)  # greenfield_static
     wan_provider = models.CharField(
         'WAN Provider', choices=WanProviderChoices.choices, max_length=20)  # greenfield_static
     access_id = models.CharField(

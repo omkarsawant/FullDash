@@ -7,8 +7,8 @@ from closet.models import Closet
 class AccessSwitch(models.Model):
 
     class AccessChoices(models.TextChoices):
-        CATALYST_3850 = 'catalyst_3850', _('Catalyst 3850')
-        CATALYST_9300 = 'catalyst_9300', _('Catalyst 9300')
+        CATALYST_3850 = 'Catalyst 3850', _('Catalyst 3850')
+        CATALYST_9300 = 'Catalyst 9300', _('Catalyst 9300')
 
     class MgigSwitchCountChoices(models.IntegerChoices):
         MSC_0 = 0, _('0')
@@ -83,20 +83,20 @@ class AccessPortBlock(models.Model):
 
 class Vlan(models.Model):
     class MaskLengthChoices(models.TextChoices):
-        ML_23 = 'ml_23', _('/23')
-        ML_24 = 'ml_24', _('/24')
-        ML_25 = 'ml_25', _('/25')
-        ML_26 = 'ml_26', _('/26')
-        ML_27 = 'ml_27', _('/27')
-        ML_28 = 'ml_28', _('/28')
-        ML_29 = 'ml_29', _('/29')
+        ML_23 = '/23', _('/23')
+        ML_24 = '/24', _('/24')
+        ML_25 = '/25', _('/25')
+        ML_26 = '/26', _('/26')
+        ML_27 = '/27', _('/27')
+        ML_28 = '/28', _('/28')
+        ML_29 = '/29', _('/29')
 
     class VlanTypeChoices(models.TextChoices):
-        DATA = 'data', _('Data')
-        VOICE = 'voice', _('Voice')
-        SECURITY = 'security', _('Security')
-        SERVER = 'server', _('Server')
-        VOICE_SERVER = 'voice_server', _('Voice Server')
+        DATA = 'Data', _('Data')
+        VOICE = 'Voice', _('Voice')
+        SECURITY = 'Security', _('Security')
+        SERVER = 'Server', _('Server')
+        VOICE_SERVER = 'Voice Server', _('Voice Server')
 
     vlan_type = models.CharField(
         'VLAN Type', choices=VlanTypeChoices.choices, max_length=12, blank=True, null=True)  # greenfield_dynamic

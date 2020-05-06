@@ -5,9 +5,9 @@ from onboard.models import Site
 
 class Closet(models.Model):
     class CategoryChoices(models.TextChoices):
-        IDF = 'idf', _('IDF')
-        MDF = 'mdf', _('MDF')
-        MDF_IDF = 'mdf_idf', _('MDF & IDF')
+        IDF = 'IDF', _('IDF')
+        MDF = 'MDF', _('MDF')
+        MDF_IDF = 'MDF & IDF', _('MDF & IDF')
 
     floor = models.IntegerField('Floor')  # greenfield_static
     category = models.CharField('Closet Type', max_length=9,

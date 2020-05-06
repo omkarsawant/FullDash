@@ -40,7 +40,6 @@ def generate_docs(site_record, build_type):
             print(error)  # TODO: pass upwards
         access_devices.append(access_device)
     required_prefixes.sort(reverse=True)
-    print(required_prefixes)
     # TODO: check overlapping of preconfigured
     # get supernets
     supernets = Supernet.objects.filter(

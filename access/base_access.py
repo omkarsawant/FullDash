@@ -5,12 +5,12 @@ from .models import AccessSwitch, Vlan
 ACCESS_SWITCH_SPECS = {
     'MGIG_STACK': {
         'BASE_INTR': {
-            'catalyst_3850': 'Gig',
-            'catalyst_9300': 'TwoGig',
+            'Catalyst 3850': 'Gig',
+            'Catalyst 9300': 'TwoGig',
         },
         'MGIG_INTR': {
-            'catalyst_3850': 'TenGig',
-            'catalyst_9300': 'TenGig',
+            'Catalyst 3850': 'TenGig',
+            'Catalyst 9300': 'TenGig',
         },
         'UPLINK_INTRS': {
             'SINGLE_SWITCH': ['TenGig1/1/3', 'TenGig1/1/4'],
@@ -19,8 +19,8 @@ ACCESS_SWITCH_SPECS = {
     },
     'NMGIG_STACK': {
         'BASE_INTR': {
-            'catalyst_3850': 'Gig',
-            'catalyst_9300': 'Gig',
+            'Catalyst 3850': 'Gig',
+            'Catalyst 9300': 'Gig',
         },
         'UPLINK_INTRS': {
             'SINGLE_SWITCH': ['Gig1/1/3', 'Gig1/1/4'],
@@ -177,4 +177,25 @@ def get_stack_port_names(access_switch):
 
 
 def get_device_dict(access_switch_record, key_prefix):
-    pass
+    device_dict = {}
+    device_dict[key_prefix + '_HOSTNAME'] = access_switch_record.hostname
+    device_dict[key_prefix +
+                '_MGIG_COUNT'] = str(access_switch_record.mgig_count)
+    device_dict[key_prefix + '_NMGIG_COUNT'] = str(
+        access_switch_record.switch_count - access_switch_record.mgig_count)
+    device_dict[key_prefix + '_UP1'] = '.' + \
+        access_switch_record.uplink_1_ip.split('.')[-1]
+    device_dict[key_prefix + '_UP1_N'] = str(IPv4Network(
+        access_switch_record.uplink_1_ip + '/31', False))
+    device_dict[key_prefix + '_UP2'] = '.' + \
+        access_switch_record.uplink_2_ip.split('.')[-1]
+    device_dict[key_prefix + '_UP2_N'] = str(IPv4Network(
+        access_switch_record.uplink_2_ip + '/31', False))
+    device_dict[key_prefix + '_AP'] = str(access_switch_record.ap_count)
+    device_dict[key_prefix + '_VLANS'] = ''
+    vlan_records = Vlan.objects.filter(access_switch=access_switch_record)
+    for vlan_record in vlan_records:
+        device_dict[key_prefix + '_VLANS'] = device_dict[key_prefix + '_VLANS'] + '\n' + \
+            str(vlan_record.vlan_id) + ' - ' + \
+            vlan_record.svi_ip + vlan_record.svi_mask_length
+    return device_dict
