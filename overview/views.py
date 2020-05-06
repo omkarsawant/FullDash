@@ -14,21 +14,35 @@ def build_view(request, *args, **kwargs):
     site_record = base_system.initialize_navbar(
         obj, request, kwargs['site_id'])
     if request.method == 'GET':
-        obj.build_form = BuildForm(initial={'build_output': 'Lol'})
+        obj.build_form = BuildForm()
         return render(request, template_name, {'obj': obj})
     if request.method == 'POST':
         if 'navbar' in request.POST:
             site_record_navbar = Site.objects.get(
                 network_name=request.POST['site'])
             return redirect(reverse('overview', kwargs={'site_id': site_record_navbar.id}))
-        elif 'subnet' in request.POST:
-            generate_docs.generate_docs(site_record, 'subnet')
+        obj.build_form = BuildForm(request.POST)
+        if 'subnet' in request.POST:
+            build_output = generate_docs.generate_docs(site_record, 'subnet')
         elif 'diagram' in request.POST:
-            generate_docs.generate_docs(site_record, 'diagram')
+            if obj.build_form.is_valid():
+                build_output = generate_docs.generate_docs(
+                    site_record, 'diagram', diagram_author=obj.build_form.cleaned_data['diagram_author'])
+            else:
+                base_system.set_form_errors(request, obj.build_form)
+                return render(request, template_name, {'obj': obj})
         elif 'config' in request.POST:
-            generate_docs.generate_docs(site_record, 'config')
+            build_output = generate_docs.generate_docs(site_record, 'config')
         elif 'all' in request.POST:
-            generate_docs.generate_docs(site_record, 'all')
+            if obj.build_form.is_valid():
+                build_output = generate_docs.generate_docs(
+                    site_record, 'all', diagram_author=obj.build_form.cleaned_data['diagram_author'])
+            else:
+                base_system.set_form_errors(request, obj.build_form)
+                return render(request, template_name, {'obj': obj})
+        obj.build_form = BuildForm(request.POST, initial={
+                                   'build_output': build_output})
+        return render(request, template_name, {'obj': obj})
 
 
 def overview_view(request, *args, **kwargs):

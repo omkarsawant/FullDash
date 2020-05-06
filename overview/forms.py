@@ -14,8 +14,8 @@ class BuildForm(forms.Form):
         self.fields['build_output'].widget.attrs['rows'] = 10
         self.fields['build_output'].widget.attrs['readonly'] = True
 
-    diagram_author = forms.CharField(label='Diagram Author')
-    build_output = forms.CharField(label='Build Output')
+    diagram_author = forms.CharField(label='Diagram Author', required=False)
+    build_output = forms.CharField(label='Build Output', required=False)
 
 
 class ExcludedSubnetCreateForm(forms.ModelForm):

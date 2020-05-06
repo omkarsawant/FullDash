@@ -42,14 +42,16 @@ class SubnetPlanner:
             supernets = self.supernets.copy()
             remaining_supernet = None
             for supernet in supernets:
+                subnet_found = False
                 try:
                     remaining_supernet = list(
                         supernet.address_exclude(excluded_subnet))
+                    subnet_found = True
                 except:
                     continue
                 self.adjust_subnet_breakdown(
                     self.supernets, supernet, remaining_supernet)
                 break
-            if not remaining_supernet:
+            if not subnet_found:
                 extra_subnets.append(str(excluded_subnet))
         return extra_subnets

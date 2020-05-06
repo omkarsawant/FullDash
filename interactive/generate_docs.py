@@ -9,7 +9,7 @@ from .subnet_planner import SubnetPlanner
 from .visio_builder import visio_builder
 
 
-def generate_docs(site_record, build_type):
+def generate_docs(site_record, build_type, diagram_author=None):
     # get site information
     closet_records = Closet.objects.filter(site=site_record)
     router_records = Router.objects.filter(closet__in=closet_records)
@@ -72,7 +72,7 @@ def generate_docs(site_record, build_type):
         # TODO: generate other fields
         pass
     if build_type in ['diagram', 'all']:
-        visio_builder(site_record, closet_records)
+        visio_builder(site_record, closet_records, diagram_author)
 
 
 def combine_ip_requirements(ip_requirements, required_prefixes, preconfigured_subnets):

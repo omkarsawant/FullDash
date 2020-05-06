@@ -115,6 +115,7 @@ class AccessSwitchDevice:
                 assigned_subnets[31].pop(0)[1])
         for vlan_record in self.vlan_records:
             if not vlan_record.svi_ip:
+                print(vlan_record.svi_mask_length)
                 vlan_record.svi_ip = str(
                     assigned_subnets[int(vlan_record.svi_mask_length[-2:])].pop(0)[1])
                 vlan_record.save()
