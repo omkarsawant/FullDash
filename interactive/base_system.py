@@ -8,7 +8,13 @@ from overview.forms import NavbarForm
 from router.models import Router
 
 ERROR_IMAGE_COUNT = 1
+
 HOSTNAME = 'r{device}{country}{crest:0>4}-{closet}-{instance:03}'
+
+DIRECTORIES = {
+    'diagrams': '/static/diagrams/',
+    'staging': '/static/staging/',
+}
 
 MESSAGES = {
     'ACCESS_CREATED': 'New access switch stack was initialized. Please specify the details below.',
@@ -94,6 +100,13 @@ def get_device_records(device, mdf_closets):
         device_records = device_records.union(
             device.objects.filter(closet=mdf_closet))
     return device_records
+
+
+def get_filename(crest, filetype):
+    if filetype == 'visio':
+        return str(crest) + '-Network Diagram.vsdx'
+    elif filetype == 'ipam':
+        return str(crest) + '-IPAM Request.xlsx'
 
 
 def get_mdf_closets(closet_records):

@@ -103,6 +103,9 @@ class AccessSwitchDevice:
                     int(vlan_record.svi_mask_length[-2:]))
         return self.required_prefixes, self.preconfigured_subnets
 
+    def get_ipam_list(self):
+        pass
+
     def set_ips(self, assigned_subnets):
         if not self.device_record.uplink_1_ip:
             self.device_record.uplink_1_ip = str(
@@ -171,3 +174,7 @@ def get_stack_port_names(access_switch):
         port_name_list.extend([(default_port_base+str(switch_index) +
                                 '/0/'+str(port_index),)*2 for port_index in range(1, 49)])
     return port_name_list
+
+
+def get_device_dict(access_switch_record, key_prefix):
+    pass

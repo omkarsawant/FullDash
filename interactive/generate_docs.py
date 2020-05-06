@@ -6,6 +6,7 @@ from router import base_router
 from router.models import Router
 
 from .subnet_planner import SubnetPlanner
+from .visio_builder import visio_builder
 
 
 def generate_docs(site_record, build_type):
@@ -27,7 +28,7 @@ def generate_docs(site_record, build_type):
         combine_ip_requirements(
             router_devices[1].get_ip_requirements(router_devices[0]), required_prefixes, preconfigured_subnets)
     except AttributeError as error:
-        pass  # TODO: pass upwards
+        print(error)  # TODO: pass upwards
     access_devices = []
     for access_switch_record in access_switch_records:
         access_device = base_access.AccessSwitchDevice(
@@ -36,15 +37,16 @@ def generate_docs(site_record, build_type):
             combine_ip_requirements(
                 access_device.get_ip_requirements('router_primary', router_devices[0], router_devices[1]), required_prefixes, preconfigured_subnets)
         except AttributeError as error:
-            pass  # TODO: pass upwards
+            print(error)  # TODO: pass upwards
         access_devices.append(access_device)
     required_prefixes.sort(reverse=True)
+    print(required_prefixes)
     # TODO: check overlapping of preconfigured
     # get supernets
     supernets = Supernet.objects.filter(
         site=site_record).values_list('supernet_cidr', flat=True)
     # TODO: check if supernet empty and required prefix exists
-    if build_type in ['subnet', 'all']':
+    if build_type in ['subnet', 'all']:
         # get excluded subnets
         excluded_subnets = preconfigured_subnets.copy()
         excluded_subnets.extend(ExcludedSubnet.objects.filter(
@@ -65,12 +67,13 @@ def generate_docs(site_record, build_type):
             access_device.set_ips(assigned_subnets)
         # TODO: make core connections
         # TODO: make server connections
-        router_devices[1].make_connections(None, access_devices)
+        router_devices[1].make_connections(router_devices[0], access_devices)
         router_devices[0].make_connections(router_devices[1], access_devices)
-    if build_type in ['config', 'all']':
+    if build_type in ['config', 'all']:
+        # TODO: generate other fields
         pass
     if build_type in ['diagram', 'all']:
-        pass
+        visio_builder(site_record, closet_records)
 
 
 def combine_ip_requirements(ip_requirements, required_prefixes, preconfigured_subnets):

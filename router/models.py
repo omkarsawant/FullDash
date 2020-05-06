@@ -77,7 +77,7 @@ class Router(models.Model):
     remote_asn = models.IntegerField(
         'Remote BGP ASN')  # greenfield_static
     other_router_loopback_ip = models.CharField(
-        'Other Router Loopback IP', max_length=15, blank=True, null=True)  # brownfield_generated
+        'Other Router Loopback IP', max_length=15, blank=True, null=True)  # TODO: model_generated
     other_router_hostname = models.CharField(
         'Other Router Hostname', max_length=19, null=True)  # model_generated
     isp_ip = models.CharField(

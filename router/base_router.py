@@ -50,12 +50,23 @@ class RouterDevice:
     def get_ip_requirements(self, router_device=None):
         self.preconfigured_subnets = []
         self.required_prefixes = [] if self.device_record.loopback_ip else [32]
+        '''if self.device_record.isp_ip:
+            try:
+                IPv4Network(self.device_record.isp_ip + '/' +
+                            self.device_record.wan_link_cidr.split('/')[-1])
+            except:
+                raise AttributeError('')  # TODO: get error from base_system
+        else:
+            raise AttributeError('')  # TODO: get error from base_system'''
         if self.secondary_router:
             if not self.check_connection(self.device_record.interlink_1_ip, router_device.device_record.interlink_1_ip, 31):
                 raise AttributeError('')  # TODO: get error from base_system
             if not self.check_connection(self.device_record.interlink_2_ip, router_device.device_record.interlink_2_ip, 31):
                 raise AttributeError('')  # TODO: get error from base_system
         return self.required_prefixes, self.preconfigured_subnets
+
+    def get_ipam_list(self):
+        pass
 
     def set_ips(self, assigned_subnets):
         if not self.device_record.loopback_ip:
@@ -65,12 +76,13 @@ class RouterDevice:
             if not self.device_record.interlink_1_ip:
                 self.device_record.interlink_1_ip = str(
                     assigned_subnets[31].pop(0)[1])
-            if self.device_record.interlink_2_ip:
+            if not self.device_record.interlink_2_ip:
                 self.device_record.interlink_2_ip = str(
                     assigned_subnets[31].pop(0)[1])
         self.device_record.save()
 
     def make_connections(self, router_device, downlink_devices):
+        self.other_router_loopback_ip = router_device.device_record.loopback_ip
         if self.secondary_router:
             if not self.device_record.downlink_1_ip:
                 self.device_record.downlink_1_ip = str(
@@ -83,7 +95,7 @@ class RouterDevice:
             if not self.device_record.interlink_1_ip:
                 self.device_record.interlink_1_ip = str(
                     IPv4Network(router_device.device_record.interlink_1_ip + '/31', False))[:-3]
-            if self.device_record.interlink_2_ip:
+            if not self.device_record.interlink_2_ip:
                 self.device_record.interlink_2_ip = str(
                     IPv4Network(router_device.device_record.interlink_2_ip + '/31', False))[:-3]
             if not self.device_record.downlink_1_ip:
@@ -94,3 +106,28 @@ class RouterDevice:
                     self.device_record.downlink_2_ip = str(
                         IPv4Network(downlink_devices[1].device_record.uplink_1_ip + '/31', False))[:-3]
         self.device_record.save()
+
+
+def get_device_dict(router_record, key_prefix):
+    device_dict = {}
+    device_dict[key_prefix + '_HOSTNAME'] = router_record.hostname
+    device_dict[key_prefix + '_LOOPBACK'] = router_record.loopback_ip
+    device_dict[key_prefix + '_UP'] = '.' + \
+        router_record.wan_link_cidr.split('.')[-1].split('/')[0]
+    device_dict[key_prefix + '_IN1'] = '.' + \
+        router_record.interlink_1_ip.split('.')[-1]
+    device_dict[key_prefix + '_IN2'] = '.' + \
+        router_record.interlink_2_ip.split('.')[-1]
+    device_dict[key_prefix + '_DN1'] = '.' + \
+        router_record.downlink_1_ip.split('.')[-1]
+    if router_record.downlink_2_ip:
+        device_dict[key_prefix + '_DN2'] = '.' + \
+            router_record.downlink_2_ip.split('.')[-1]
+    '''device_dict[key_prefix + '_ISP'] = '.' + \
+        router_record.isp_ip.split('.')[-1]'''
+    device_dict[key_prefix + '_ISP_NAME'] = router_record.wan_provider
+    device_dict[key_prefix + '_ISP_CID'] = router_record.access_id + \
+        '/' + router_record.port_id
+    device_dict[key_prefix + '_ISP_SP'] = str(router_record.access_bw) + \
+        'Mbps/' + str(router_record.port_bw) + 'Mbps'
+    return device_dict

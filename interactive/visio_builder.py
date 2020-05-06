@@ -1,20 +1,56 @@
-from zipfile import ZipFile
-import win32com.client
+from . import base_system
+from .settings import BASE_DIR
 
-zip_in = ZipFile(
-    'C:/Users/Omi/Documents/Projects/FullDash/static/diagrams/Drawing1.vsdx', 'r')
-page_file = zip_in.open('visio/pages/page2.xml', 'r').read()
-new_file = zip_in.open('visio/pages/_rels/page2.xml.rels', 'r').read()
-page_file = page_file.replace(b'hostname', b'ghostghost')
-zip_out = ZipFile(
-    'C:/Users/Omi/Documents/Projects/FullDash/static/diagrams/Drawing99.vsdx', 'w')
-excluded_filenames = ['visio/pages/page3.xml',
-                      'visio/pages/_rels/page3.xml.rels']
-zip_out.comment = zip_in.comment
-for item in zip_in.infolist():
-    if item.filename not in excluded_filenames:
-        zip_out.writestr(item, zip_in.read(item.filename))
-zip_out.writestr(excluded_filenames[0], page_file)
-zip_out.writestr(excluded_filenames[1], new_file)
-zip_out.close()
-zip_in.close()
+from access import base_access
+from access.models import AccessSwitch
+from router import base_router
+from router.models import Router
+
+from zipfile import ZipFile
+
+
+def visio_builder(site_record, closet_records):
+    router_records = Router.objects.filter(closet__in=closet_records)
+    access_switch_records = AccessSwitch.objects.filter(
+        closet__in=closet_records)
+    visio_template = ZipFile(BASE_DIR + base_system.DIRECTORIES['diagrams'] + get_visio_template_name(
+        site_record, router_records, access_switch_records), 'r')
+    visio_file = ZipFile(
+        BASE_DIR + base_system.DIRECTORIES['staging'] + base_system.get_filename(site_record.crest, 'visio'), 'w')
+    visio_file.comment = visio_template.comment
+    diagram_dict = {}
+    diagram_dict.update(base_router.get_device_dict(router_records[0], 'R1'))
+    diagram_dict.update(base_router.get_device_dict(router_records[1], 'R2'))
+    if site_record.signal_present_core:
+        #TODO: implement
+        pass
+    else:
+        for index, access_switch_record in enumerate(access_switch_records):
+            diagram_dict.update(
+                base_access.get_device_dict(access_switch_record, 'A' + str(index+1)))
+        page_filename = get_zip_filename('page', 2)
+        page_file = visio_template.open(page_filename, 'r').read()
+        set_visio_page(page_file, diagram_dict)
+        for zip_file in visio_template.infolist():
+            zip_filename = zip_file.filename
+            if zip_filename != page_filename:
+                visio_file.writestr(
+                    zip_file, visio_template.read(zip_filename))
+            else:
+                visio_file.writestr(page_filename, page_file)
+    visio_template.close()
+    visio_file.close()
+
+
+def set_visio_page(page_file, page_dict):
+    for key, value in page_dict.items():
+        page_file = page_file.replace(key.encode(), value.encode())
+
+
+def get_zip_filename(filetype, file_number):
+    if filetype == 'page':
+        return 'visio/pages/page' + str(file_number) + '.xml'
+
+
+def get_visio_template_name(site_record, router_records, access_switch_records):
+    return 'Drawing1.vsdx'
