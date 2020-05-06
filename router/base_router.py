@@ -115,7 +115,7 @@ def get_device_dict(router_record, secondary_router, key_prefix):
     device_dict[key_prefix + '_UP'] = '.' + \
         router_record.wan_link_cidr.split('.')[-1].split('/')[0]
     device_dict[key_prefix +
-                '_UP_N'] = str(IPv4Network(router_record.wan_link_cidr, False))
+                '_N_UP'] = str(IPv4Network(router_record.wan_link_cidr, False))
     device_dict[key_prefix + '_IN1'] = '.' + \
         router_record.interlink_1_ip.split('.')[-1]
     device_dict[key_prefix + '_IN2'] = '.' + \
@@ -133,8 +133,8 @@ def get_device_dict(router_record, secondary_router, key_prefix):
         device_dict[key_prefix + '_DN2'] = '.' + \
             router_record.downlink_2_ip.split('.')[-1]
     if secondary_router:
-        device_dict[key_prefix + '_IN1_N'] = str(
+        device_dict[key_prefix + '_N_IN1'] = str(
             IPv4Network(router_record.interlink_1_ip + '/31', False))
-        device_dict[key_prefix + '_IN2_N'] = str(
+        device_dict[key_prefix + '_N_IN2'] = str(
             IPv4Network(router_record.interlink_2_ip + '/31', False))
     return device_dict

@@ -180,16 +180,16 @@ def get_device_dict(access_switch_record, key_prefix):
     device_dict = {}
     device_dict[key_prefix + '_HOSTNAME'] = access_switch_record.hostname
     device_dict[key_prefix +
-                '_MGIG_COUNT'] = str(access_switch_record.mgig_count)
-    device_dict[key_prefix + '_NMGIG_COUNT'] = str(
+                '_MGIG_C'] = str(access_switch_record.mgig_count)
+    device_dict[key_prefix + '_NMGIG_C'] = str(
         access_switch_record.switch_count - access_switch_record.mgig_count)
     device_dict[key_prefix + '_UP1'] = '.' + \
         access_switch_record.uplink_1_ip.split('.')[-1]
-    device_dict[key_prefix + '_UP1_N'] = str(IPv4Network(
+    device_dict[key_prefix + '_N_UP1'] = str(IPv4Network(
         access_switch_record.uplink_1_ip + '/31', False))
     device_dict[key_prefix + '_UP2'] = '.' + \
         access_switch_record.uplink_2_ip.split('.')[-1]
-    device_dict[key_prefix + '_UP2_N'] = str(IPv4Network(
+    device_dict[key_prefix + '_N_UP2'] = str(IPv4Network(
         access_switch_record.uplink_2_ip + '/31', False))
     device_dict[key_prefix + '_AP'] = str(access_switch_record.ap_count)
     device_dict[key_prefix + '_VLANS'] = ''
