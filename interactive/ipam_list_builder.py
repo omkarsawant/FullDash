@@ -4,7 +4,6 @@ from zipfile import ZipFile
 
 
 def ipam_list_builder(crest, ip_ipam_list, vlan_ipam_list):
-    print(vlan_ipam_list)
     ipam_template = ZipFile(
         BASE_DIR + base_system.DIRECTORIES['ipam'] + 'ipam.xlsx', 'r')
     ipam_file = ZipFile(
@@ -61,7 +60,6 @@ def ipam_list_builder(crest, ip_ipam_list, vlan_ipam_list):
     vlan_ipam_row_number = 2
     for vlan_ipam in vlan_ipam_list:
         vlan_ipam_tokens = vlan_ipam.split('$$')
-        print(vlan_ipam_tokens)
         vlan_ipam_string = vlan_ipam_string + '<row r="' + \
             str(vlan_ipam_row_number) + '" spans="1:3" x14ac:dyDescent="0.3">'
         vlan_ipam_col_number = 1

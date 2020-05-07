@@ -72,6 +72,8 @@ class Site(models.Model):
         'Site Non-standard', null=True)  # signal
     signal_onboarded_site = models.BooleanField(
         'Site Onboarded', null=True)  # signal
+    signal_overlapping_access = models.BooleanField(
+        'Access Port Block Overlapping', null=True)  # signal
     signal_present_core = models.BooleanField(
         'Core Present', null=True)  # signal
     signal_present_server = models.BooleanField(

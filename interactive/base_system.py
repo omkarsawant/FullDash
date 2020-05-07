@@ -22,6 +22,7 @@ MESSAGES = {
     'ACCESS_UPDATED': '',
     'CORE_UPDATED': '',
     'DUPLICATE_VLAN': 'Only one security and voice server VLAN permitted.',
+    'OVERLAPPING_ACCESS': 'Warning: Access Switch has overlapping port assingments',
     'SERVER_UPDATED': '',
     'SITE_ONBOARDED': 'Site was successfully onboarded. Please create network closets below.',
     'WAN_UPDATED': '',
@@ -165,6 +166,9 @@ def initialize_navbar(obj, request, site_id=None):
         if site_record.signal_onboarded_site:
             messages.success(request, MESSAGES['SITE_ONBOARDED'])
             site_record.signal_onboarded_site = False
+        if site_record.signal_overlapping_access:
+            messages.warning(request, MESSAGES['OVERLAPPING_ACCESS'])
+            site_record.signal_overlapping_access = False
         obj.signal_present_core = True if site_record.signal_present_core else False
         obj.signal_present_server = True if site_record.signal_present_server else False
         if site_record.signal_updated_access:

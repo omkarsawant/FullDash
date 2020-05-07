@@ -62,6 +62,24 @@ def access_brown_view(request, *args, **kwargs):
                 access_port_block_instance.save()
             for access_port_block_form in obj.access_port_block_formset.deleted_forms:
                 access_port_block_form.save(commit=False).delete()
+            access_switch_ports = base_access.get_stack_port_names(
+                obj.access_switch_record)
+            access_port_block_starts = []
+            access_port_block_ends = []
+            for access_port_block_record in AccessPortBlock.objects.filter(access_switch=obj.access_switch_record):
+                access_port_block_start = access_switch_ports.index(
+                    (access_port_block_record.start_intr,)*2)
+                access_port_block_end = access_switch_ports.index(
+                    (access_port_block_record.end_intr,)*2)
+                for index in range(len(access_port_block_starts)):
+                    if access_port_block_start >= access_port_block_starts[index] and access_port_block_start <= access_port_block_ends[index]:
+                        site_record.signal_overlapping_access = True
+                        site_record.save()
+                        break
+                if site_record.signal_overlapping_access:
+                    break
+                access_port_block_starts.append(access_port_block_start)
+                access_port_block_ends.append(access_port_block_end)
         if 'finish' in request.POST:
             return redirect(reverse('access_lising', kwargs={'site_id': site_record.id}))
         return redirect(reverse('access_brown', kwargs={'site_id': site_record.id, 'access_switch_id': obj.access_switch_record.id}))
@@ -118,6 +136,24 @@ def access_green_view(request, *args, **kwargs):
                 access_port_block_instance.save()
             for access_port_block_form in obj.access_port_block_formset.deleted_forms:
                 access_port_block_form.save(commit=False).delete()
+            access_switch_ports = base_access.get_stack_port_names(
+                obj.access_switch_record)
+            access_port_block_starts = []
+            access_port_block_ends = []
+            for access_port_block_record in AccessPortBlock.objects.filter(access_switch=obj.access_switch_record):
+                access_port_block_start = access_switch_ports.index(
+                    (access_port_block_record.start_intr,)*2)
+                access_port_block_end = access_switch_ports.index(
+                    (access_port_block_record.end_intr,)*2)
+                for index in range(len(access_port_block_starts)):
+                    if access_port_block_start >= access_port_block_starts[index] and access_port_block_start <= access_port_block_ends[index]:
+                        site_record.signal_overlapping_access = True
+                        site_record.save()
+                        break
+                if site_record.signal_overlapping_access:
+                    break
+                access_port_block_starts.append(access_port_block_start)
+                access_port_block_ends.append(access_port_block_end)
         if 'finish' in request.POST:
             return redirect(reverse('access_lising', kwargs={'site_id': site_record.id}))
         return redirect(reverse('access_green', kwargs={'site_id': site_record.id, 'access_switch_id': obj.access_switch_record.id}))
