@@ -1,0 +1,261 @@
+!!--Services
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamp log datetime msec localtime show-timezone
+service timestamp debug  datetime msec localtime show-timezone
+service password-encryption
+service compress-config
+no service tcp-small-servers
+no service udp-small-servers
+ip ssh version 2
+service nagle
+no ip finger
+no ip http server
+no ip http secure-server
+no ip source-route
+no service pad
+no service internal
+no vstack
+clock timezone UTC 0
+file verify auto
+ip dhcp bootp ignore
+!
+ip domain lookup
+ip domain name network.aig.net
+ip name-server 167.230.93.3
+ip name-server 167.230.93.5
+!
+crypto key generate rsa modulus 2048 usage-keys
+!
+ip ssh version 2
+ip ssh authentication-retries 3
+ip ssh time-out 120
+!
+ip ssh server algorithm encryption aes256-ctr aes256-cbc
+ip ssh server algorithm mac hmac-sha1
+ip ssh dh min size 4096 
+!
+ip ssh source-interface Loopback0
+!
+mac address-table notification change
+mac address-table notification mac-move
+!
+lldp run
+!
+vtp domain aig
+vtp mode transparent
+!
+!
+!!--Break Glass Access
+enable secret 50olmw1d
+username netops password 12cjgs9m
+!
+!
+!!--TACACS
+tacacs-server host 10.87.233.166
+tacacs-server host 10.97.233.247
+tacacs-server host 10.116.15.35
+ip tacacs source-interface Loopback0
+tacacs-server timeout 5
+tacacs-server directed-request
+tacacs-server key 7 087055192F3F15430B0503
+!
+!
+!!--ACL
+access-list 8 permit 172.20.246.0 0.0.0.255
+access-list 8 permit 10.87.57.0 0.0.0.255
+access-list 8 permit 10.87.68.0 0.0.1.255
+access-list 8 permit 172.20.214.0 0.0.0.255
+access-list 8 permit 10.87.67.0 0.0.0.255
+access-list 8 permit 10.87.232.0 0.0.1.255
+access-list 8 permit 10.90.80.0 0.0.0.255
+access-list 8 permit 10.97.61.0 0.0.0.255
+access-list 8 permit 10.97.68.0 0.0.1.255
+access-list 8 permit 10.97.232.0 0.0.1.255
+access-list 8 permit 10.97.67.0 0.0.0.255
+access-list 8 permit 10.25.153.0 0.0.0.255
+access-list 8 permit 170.105.29.0 0.0.0.255
+access-list 8 permit 10.30.75.0 0.0.0.255
+access-list 8 permit 10.52.94.64 0.0.0.63
+access-list 8 permit 10.52.122.0 0.0.0.255
+access-list 8 permit 10.52.80.0 0.0.0.255
+access-list 8 permit 10.52.82.0 0.0.0.255
+access-list 8 permit 10.48.86.0 0.0.0.255
+access-list 8 permit 10.116.15.0 0.0.0.127
+access-list 8 permit 10.116.79.0 0.0.0.255
+access-list 8 permit 10.116.10.0 0.0.0.255
+access-list 8 permit 10.116.13.0 0.0.0.255
+access-list 8 permit 10.117.24.0 0.0.0.255
+access-list 8 permit 10.52.240.0 0.0.0.255
+access-list 8 permit 10.25.190.0 0.0.0.255
+access-list 8 permit 198.84.32.0 0.0.15.255
+access-list 8 permit 10.87.244.0 0.0.0.255
+access-list 8 permit 10.197.4.0 0.0.0.255
+access-list 8 permit 10.25.157.0 0.0.0.255
+access-list 8 permit host 10.117.102.208
+access-list 8 permit host 10.117.102.207
+access-list 8 permit host 10.49.194.120
+access-list 8 permit host 10.49.194.121
+access-list 8 permit host 10.25.148.185
+access-list 8 permit host 10.25.148.186
+access-list 8 permit host 10.117.103.23
+access-list 8 permit host 10.117.103.22
+access-list 8 permit host 10.49.194.152
+access-list 8 permit host 10.49.194.97
+access-list 8 permit host 10.162.64.38
+access-list 8 permit host 10.125.92.53
+access-list 8 permit host 10.125.92.54
+access-list 8 permit host 10.206.92.53
+access-list 8 permit host 10.206.92.54
+!
+access-list 24 permit host 10.16.183.216
+access-list 24 permit host 10.30.75.10
+access-list 24 permit host 10.30.75.8
+access-list 24 permit host 10.30.75.9
+access-list 24 permit host 10.52.240.23
+access-list 24 permit host 10.52.240.24
+access-list 24 permit host 10.52.80.28
+access-list 24 permit host 10.52.80.29
+access-list 24 permit host 10.52.82.95
+access-list 24 permit host 10.87.69.59
+access-list 24 permit host 10.87.69.61
+access-list 24 permit host 10.97.66.35
+access-list 24 permit host 10.97.66.53
+access-list 24 permit host 10.97.66.82
+access-list 24 permit host 10.97.69.37
+access-list 24 permit host 10.97.69.39
+access-list 24 permit host 10.97.69.74
+access-list 24 permit host 10.97.69.75
+access-list 24 permit host 10.97.69.76
+access-list 24 permit host 10.97.90.101
+access-list 24 permit host 10.97.90.116
+access-list 24 permit host 10.97.90.117
+access-list 24 permit host 10.116.13.53
+access-list 24 permit host 10.116.15.125
+access-list 24 permit host 10.116.15.126
+access-list 24 permit host 10.116.79.125
+access-list 24 permit host 10.116.79.126
+access-list 24 permit 198.84.32.0 0.0.15.255
+access-list 24 permit host 170.105.29.208
+access-list 24 permit host 170.105.29.209
+access-list 24 permit host 170.105.29.210
+access-list 24 permit host 172.20.246.48
+access-list 24 permit host 170.105.198.4
+access-list 24 permit host 10.16.194.37
+access-list 24 permit host 10.87.68.121
+access-list 24 permit host 10.97.68.122
+access-list 24 permit host 10.52.82.17
+access-list 24 permit host 10.117.24.88
+access-list 24 permit host 10.116.73.41
+access-list 24 permit host 10.48.245.83
+access-list 24 permit 10.87.244.0 0.0.0.255
+access-list 24 permit 10.197.4.0 0.0.0.255
+access-list 24 deny any log
+!
+!
+!!--SNMP
+snmp-server community Axu4sW5C RO 8
+snmp-server trap-source Loopback0
+snmp-server queue-length 20
+snmp-server location <SITE_ADDRESS>
+snmp-server contact AIGDC Network services
+snmp-server host 10.87.57.44 version 2c Axu4sW5C
+snmp-server host 10.97.61.229 version 2c Axu4sW5C
+snmp-server host 198.84.32.19 version 2c Axu4sW5C
+snmp-server host 198.84.34.18 Axu4sW5C mac-notification
+snmp-server host 198.84.32.19 Axu4sW5C mac-notification
+snmp-server packetsize 1300
+ip tftp source-interface Loopback0
+ip ftp source-interface Loopback0
+snmp-server  ifindex persist
+snmp mib persist cbqos
+no snmp-server enable traps power-ethernet group 1
+no snmp-server enable traps power-ethernet group 2
+no snmp-server enable traps power-ethernet group 3
+no snmp-server enable traps power-ethernet group 4
+no snmp-server enable traps power-ethernet group 5
+no snmp-server enable traps power-ethernet group 6
+no snmp-server enable traps power-ethernet group 7
+no snmp-server enable traps power-ethernet group 8
+no snmp-server enable traps tty
+no snmp-server enable traps  aaa_server
+no snmp-server enable traps syslog
+no snmp-server chassis-id
+!
+snmp-server enable traps
+snmp-server enable traps snmp coldstart
+snmp-server enable traps snmp linkdown linkup
+snmp-server enable traps memory
+snmp-server enable traps module
+snmp-server enable traps snmp authentication
+!
+!
+!!--NTP
+ntp server 167.230.93.3
+ntp server 167.230.93.5
+ntp source Loopback0
+ntp update-calendar
+!
+!
+!!--Banner
+no banner login
+banner motd %------------------------------------------------------------------------
+- Warning: These facilities are solely for the use of authorized -
+- employees or agents of the Company, its subsidiaries and affiliates. -
+- Unauthorized use is prohibited and subject to criminal and civil -
+- penalties. Subject to applicable law, individuals using this -
+- computer system must have no expectation of privacy and are subject -
+- to having all of their activities monitored and recorded. -
+------------------------------------------------------------------------%
+!
+!
+!!--Logging
+logging on
+logging buffered 512000 notifications
+no logging console
+logging trap informational
+logging source-interface Loopback0
+logging host 10.87.54.28
+!
+!
+!!--AAA
+aaa new-model
+aaa authentication login default group tacacs+ local
+aaa authentication enable default group tacacs+ enable
+aaa authorization config-commands
+aaa authorization exec default group tacacs+ none
+aaa authorization commands 0 default group tacacs+ none
+aaa authorization commands 1 default group tacacs+ none
+aaa authorization commands 15 default group tacacs+ none
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default stop-only group tacacs+
+aaa session-id common
+!
+!
+!!--Line Configurations
+line con 0
+ exec-timeout 5 0
+ logging synchronous
+ login authentication default
+!
+line aux 0
+  no exec
+ login authentication default
+!
+line vty 0 4
+ exec-timeout 5 0
+ logging synchronous
+ login authentication default
+access-class 24 in
+transport input ssh
+transport output ssh
+!
+line vty 5 15
+ exec-timeout 5 0
+ logging synchronous
+ login authentication default
+access-class 24 in
+transport input ssh
+transport output ssh
+!
+!

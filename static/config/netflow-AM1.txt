@@ -1,0 +1,21 @@
+flow exporter AIG_Default
+ description AIG Default Netflow export to regional server
+ destination 10.87.57.48
+ source Loopback0
+ transport udp 9995
+!
+flow monitor AIG_Default_Out_Monitor
+ description AIG Default Outbound/Egress Netflow Monitor
+ cache timeout inactive 60
+ cache timeout active 60
+ exporter AIG_Default
+ record netflow ipv4 original-output
+!
+flow monitor AIG_Default_In_Monitor
+ description AIG Default Inbound/Ingress Netflow Monitor
+ cache timeout inactive 60
+ cache timeout active 60
+ exporter AIG_Default
+ record netflow ipv4 original-input
+!
+!
