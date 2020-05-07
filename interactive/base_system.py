@@ -155,17 +155,21 @@ def initialize_navbar(obj, request, site_id=None):
     if site_id:
         site_record = Site.objects.get(id=site_id)
         obj.navbar = NavbarForm(initial={'site': site_record.network_name})
+        if site_record.signal_created_access:
+            messages.success(request, MESSAGES['ACCESS_CREATED'])
         if site_record.signal_duplicate_vlan:
             messages.error(request, MESSAGES['DUPLICATE_VLAN'])
             site_record.signal_duplicate_vlan = False
-        if site_record.signal_updated_access:
-            messages.success(request, MESSAGES['ACCESS_CREATED'])
-            site_record.signal_updated_access = False
+        if site_record.signal_exception_site:
+            pass
         if site_record.signal_onboarded_site:
             messages.success(request, MESSAGES['SITE_ONBOARDED'])
             site_record.signal_onboarded_site = False
+        obj.signal_present_core = True if site_record.signal_present_core else False
+        obj.signal_present_server = True if site_record.signal_present_server else False
         if site_record.signal_updated_access:
             messages.success(request, MESSAGES['ACCESS_UPDATED'])
+            site_record.signal_updated_access = False
         if site_record.signal_updated_core:
             messages.success(request, MESSAGES['CORE_UPDATED'])
         if site_record.signal_updated_server:

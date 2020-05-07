@@ -26,18 +26,25 @@
                     <a class='nav-link' href='/fulldash/{{ obj.site_id }}/overview/'>Overview</a>
                 </li>
                 <li>
+                    <a class='nav-link' href='/fulldash/{{ obj.site_id }}/build/'>Build</a>
+                </li>
+                <li>
                     <a class='nav-link' href='/fulldash/{{ obj.site_id }}/closets/'>Closets</a>
                 </li>
                 <li>
                     <a class='nav-link' href='/fulldash/{{ obj.site_id }}/wanlanding/'>WAN
                         Layer</a>
                 </li>
+                { % if obj.signal_present_core %}
                 <li>
                     <a class='nav-link' href='/fulldash/{{ obj.site_id }}/corelanding/'>Core Layer</a>
                 </li>
+                {% endif %}
+                { % if obj.signal_present_server %}
                 <li>
                     <a class='nav-link' href='/fulldash/{{ obj.site_id }}/serverlanding/'>Server Layer</a>
                 </li>
+                {% endif %}
                 <li>
                     <a class='nav-link' href='/fulldash/{{ obj.site_id }}/accesslisting/'>Access Layer</a>
                 </li>

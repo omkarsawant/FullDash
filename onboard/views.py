@@ -38,6 +38,8 @@ def onboarding_view(request, *args, **kwargs):
                     Site.objects.filter(crest=site_record.crest)) + 1
                 site_record.network_name = f'{site_record.crest}--{site_record.address}--{site_record_number:03}'
                 site_record.signal_onboarded_site = True
+                site_record.signal_present_core = False if site_record.core == Site.CoreChoices.NO_CORE else True
+                site_record.signal_present_server = False if site_record.server == Site.ServerChoices.NO_SERVER else True
                 site_record.save()
                 return redirect(reverse('closets', kwargs={'site_id': site_record.id}))
             base_system.set_form_errors(request, obj.form)
