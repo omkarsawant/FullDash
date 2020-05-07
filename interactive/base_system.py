@@ -73,6 +73,12 @@ def check_hardware_standards(request, crest):
     return meeting_standards
 
 
+def delete_extra_devices(device, closet_records):
+    extra_device_records = device.objects.filter(closet__in=closet_records)
+    for extra_device_record in extra_device_records:
+        extra_device_record.delete()
+
+
 def generate_error(obj, modal_key):
     activate_modal(obj, modal_key)
     obj.error_file = 'images/error' + \
@@ -108,15 +114,6 @@ def get_filename(crest, filetype):
         return str(crest) + '-Network Diagram.vsdx'
     elif filetype == 'ipam':
         return str(crest) + '-IPAM Request.xlsx'
-
-
-def get_mdf_closets(closet_records):
-    # TODO: make efficient
-    mdf_closets = list()
-    for closet_record in closet_records:
-        if closet_record.category in [Closet.CategoryChoices.MDF, Closet.CategoryChoices.MDF_IDF]:
-            mdf_closets.append(closet_record)
-    return mdf_closets
 
 
 def get_mdf_device_hostnames(site_record, mdf_closets, device):

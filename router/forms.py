@@ -61,3 +61,29 @@ class WanGreenForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['wan_link_cidr'].widget.attrs['placeholder'] = base_system.PLACEHOLDERS['IP']
+
+
+class WanGreenSubForm(forms.ModelForm):
+    class Meta:
+        model = Router
+        fields = [
+            'wan_type',
+            'wan_provider',
+            'access_id',
+            'port_id',
+            'access_bw',
+            'port_bw',
+            'wan_link_cidr',
+            'remote_asn',
+        ]
+
+    def clean_remote_asn(self, *args, **kwargs):
+        remote_asn = self.cleaned_data['remote_asn']
+        if(remote_asn < 65000):
+            # TODO: finish the code!
+            raise forms.ValidationError('lolmax1')
+        return remote_asn
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['wan_link_cidr'].widget.attrs['placeholder'] = base_system.PLACEHOLDERS['IP']
