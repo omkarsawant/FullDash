@@ -5,6 +5,7 @@ from overview.models import ExcludedSubnet, Supernet
 from router import base_router
 from router.models import Router
 
+from .ipam_list_builder import ipam_list_builder
 from .subnet_planner import SubnetPlanner
 from .visio_builder import visio_builder
 
@@ -68,6 +69,17 @@ def generate_docs(site_record, build_type, diagram_author=None):
         # TODO: make server connections
         router_devices[1].make_connections(router_devices[0], access_devices)
         router_devices[0].make_connections(router_devices[1], access_devices)
+        # get IPAM list
+        site_ip_list = router_devices[0].get_ipam_list()
+        site_ip_list.extend(router_devices[1].get_ipam_list())
+        site_vlan_list = []
+        for access_device in access_devices:
+            ip_list, vlan_list = access_device.get_ipam_list()
+            site_ip_list.extend(ip_list)
+            site_vlan_list.extend(vlan_list)
+        site_ip_list.sort()
+        site_vlan_list.sort()
+        ipam_list_builder(site_record.crest, site_ip_list, site_vlan_list)
     if build_type in ['config', 'all']:
         # TODO: generate other fields
         pass

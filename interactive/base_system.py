@@ -14,6 +14,7 @@ HOSTNAME = 'r{device}{country}{crest:0>4}-{closet}-{instance:03}'
 DIRECTORIES = {
     'diagrams': '/static/diagrams/',
     'staging': '/static/staging/',
+    'ipam': '/static/ipam/',
 }
 
 MESSAGES = {

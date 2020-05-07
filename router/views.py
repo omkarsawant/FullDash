@@ -57,10 +57,10 @@ def wan_green_view(request, *args, **kwargs):
     template_name = 'wan_green.html'
     site_record = base_system.initialize_navbar(
         obj, request, kwargs['site_id'])
-    closet_records = Closet.objects.filter(site=site_record)
-    mdf_closets = base_system.get_mdf_closets(closet_records)
+    mdf_closet_records = Closet.objects.filter(
+        site=site_record, category__in=[Closet.CategoryChoices.MDF, Closet.CategoryChoices.MDF_IDF])
     obj.router_hostnames = base_system.get_mdf_device_hostnames(
-        site_record, mdf_closets, Router)
+        site_record, mdf_closet_records, Router)
     if request.method == 'GET':
         obj.form = WanGreenForm()
         return render(request, template_name, {'obj': obj})
@@ -88,12 +88,12 @@ def wan_green_view(request, *args, **kwargs):
             router_2_record = router_2_form.save(commit=False)
             router_1_record.hostname = obj.router_hostnames[0]
             router_2_record.hostname = obj.router_hostnames[1]
-            if len(mdf_closets) == 1:
-                router_1_record.closet = mdf_closets[0]
-                router_2_record.closet = mdf_closets[0]
+            if len(mdf_closet_records) == 1:
+                router_1_record.closet = mdf_closet_records[0]
+                router_2_record.closet = mdf_closet_records[0]
             else:
-                router_1_record.closet = mdf_closets[0]
-                router_2_record.closet = mdf_closets[1]
+                router_1_record.closet = mdf_closet_records[0]
+                router_2_record.closet = mdf_closet_records[1]
             router_1_record.save()
             router_2_record.save()
         obj.form = WanGreenForm(request.POST)

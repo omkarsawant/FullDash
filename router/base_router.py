@@ -4,11 +4,13 @@ from .models import Router
 
 ROUTER_SPECS = {
     'ISR 4451': {
-        'WAN_INTR': [],
-        'INTERLINK_INTRS': [],
-        'DOWNLINK_INTRS': [],
+        'WAN_INTR': ['Gig0/0/0'],
+        'INTERLINK_INTRS': ['Gig0/1/0', 'Gig0/1/1'],
+        'DOWNLINK_INTRS': ['Gig0/0/1'],
     },
 }
+
+DNS_SUFFIX = '.network.aig.net'
 
 
 class RouterDevice:
@@ -65,8 +67,26 @@ class RouterDevice:
                 raise AttributeError('')  # TODO: get error from base_system
         return self.required_prefixes, self.preconfigured_subnets
 
+    def get_dns_base(self):
+        return self.device_record.hostname + '$$' + self.device_record.hostname + '-'
+
     def get_ipam_list(self):
-        pass
+        ip_list = [self.get_dns_base() + 'lo-0' + DNS_SUFFIX + '$$' +
+                   self.device_record.loopback_ip]
+        ip_list.append(self.get_intr_ipam(
+            self.interlink_intrs[0], self.device_record.interlink_1_ip))
+        ip_list.append(self.get_intr_ipam(
+            self.interlink_intrs[1], self.device_record.interlink_2_ip))
+        ip_list.append(self.get_intr_ipam(
+            self.downlink_intrs[0], self.device_record.downlink_1_ip))
+        if len(self.downlink_intrs) == 2:
+            ip_list.append(self.get_intr_ipam(
+                self.downlink_intrs[1], self.device_record.downlink_2_ip))
+        return ip_list
+
+    def get_intr_ipam(self, intr, ip):
+        intr_breakdown = intr.split('/')
+        return self.get_dns_base() + intr_breakdown[0][:2].lower() + '-' + intr_breakdown[0][-1] + '-' + intr_breakdown[1] + '-' + intr_breakdown[2] + DNS_SUFFIX + '$$' + ip
 
     def set_ips(self, assigned_subnets):
         if not self.device_record.loopback_ip:

@@ -29,6 +29,8 @@ ACCESS_SWITCH_SPECS = {
     },
 }
 
+DNS_SUFFIX = '.network.aig.net'
+
 
 class AccessSwitchDevice:
     def __init__(self, site_record, access_switch_record):
@@ -97,16 +99,38 @@ class AccessSwitchDevice:
         for vlan_record in self.vlan_records:
             if vlan_record.svi_ip:
                 self.preconfigured_subnets.append(IPv4Network(
-                    f'{vlan_record.svi_ip}/{vlan_record.svi_mask_length[-2:]}', False))
+                    f'{vlan_record.svi_ip}{vlan_record.svi_mask_length}', False))
             else:
                 self.required_prefixes.append(
                     int(vlan_record.svi_mask_length[-2:]))
         return self.required_prefixes, self.preconfigured_subnets
 
+    def get_dns_base(self):
+        return self.device_record.hostname + '$$' + self.device_record.hostname + '-'
+
     def get_ipam_list(self):
-        pass
+        ip_list = [self.get_dns_base() + 'lo-0' + DNS_SUFFIX + '$$' +
+                   self.device_record.loopback_ip]
+        ip_list.append(self.get_uplink_ipam(
+            self.uplink_intrs[0], self.device_record.uplink_1_ip))
+        ip_list.append(self.get_uplink_ipam(
+            self.uplink_intrs[1], self.device_record.uplink_2_ip))
+        vlan_list = []
+        for vlan_record in self.vlan_records:
+            ip_list.append(self.get_dns_base() + 'vl-' +
+                           str(vlan_record.vlan_id) + DNS_SUFFIX + '$$' + vlan_record.svi_ip)
+            vlan_list.append(self.device_record.hostname + '$$VLAN ' + str(vlan_record.vlan_id) + '$$' + str(IPv4Network(
+                vlan_record.svi_ip + vlan_record.svi_mask_length, False)))
+        return ip_list, vlan_list
+
+    def get_uplink_ipam(self, uplink_intr, uplink_ip):
+        uplink_intr_breakdown = uplink_intr.split('/')
+        return self.get_dns_base() + uplink_intr_breakdown[0][:2].lower() + '-' + uplink_intr_breakdown[0][-1] + '-' + uplink_intr_breakdown[1] + '-' + uplink_intr_breakdown[2] + DNS_SUFFIX + '$$' + uplink_ip
 
     def set_ips(self, assigned_subnets):
+        if not self.device_record.loopback_ip:
+            self.device_record.loopback_ip = str(
+                assigned_subnets[32].pop(0))[:-3]
         if not self.device_record.uplink_1_ip:
             self.device_record.uplink_1_ip = str(
                 assigned_subnets[31].pop(0)[1])
@@ -115,7 +139,6 @@ class AccessSwitchDevice:
                 assigned_subnets[31].pop(0)[1])
         for vlan_record in self.vlan_records:
             if not vlan_record.svi_ip:
-                print(vlan_record.svi_mask_length)
                 vlan_record.svi_ip = str(
                     assigned_subnets[int(vlan_record.svi_mask_length[-2:])].pop(0)[1])
                 vlan_record.save()

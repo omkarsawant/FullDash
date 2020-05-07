@@ -18,18 +18,18 @@ def visio_builder(site_record, closet_records, diagram_author):
     visio_file = ZipFile(
         BASE_DIR + base_system.DIRECTORIES['staging'] + base_system.get_filename(site_record.crest, 'visio'), 'w')
     visio_file.comment = visio_template.comment
-    page_file_dict = {}
+    zip_file_dict = {}
     background_page_filename = get_zip_filename('page', 1)
-    page_file_dict[background_page_filename] = visio_template.open(
+    zip_file_dict[background_page_filename] = visio_template.open(
         background_page_filename, 'r').read()
-    page_file_dict[background_page_filename] = set_visio_page(
-        page_file_dict[background_page_filename], get_background_dict(site_record, diagram_author))
+    zip_file_dict[background_page_filename] = set_visio_page(
+        zip_file_dict[background_page_filename], get_background_dict(site_record, diagram_author))
     if site_record.signal_present_core:
         #TODO: implement
         pass
     else:
         page_filename = get_zip_filename('page', 2)
-        page_file_dict[page_filename] = visio_template.open(
+        zip_file_dict[page_filename] = visio_template.open(
             page_filename, 'r').read()
         page_dict = {}
         page_dict.update(base_router.get_device_dict(
@@ -39,15 +39,15 @@ def visio_builder(site_record, closet_records, diagram_author):
         for index, access_switch_record in enumerate(access_switch_records):
             page_dict.update(base_access.get_device_dict(
                 access_switch_record, 'A' + str(index+1)))
-        page_file_dict[page_filename] = set_visio_page(
-            page_file_dict[page_filename], page_dict)
+        zip_file_dict[page_filename] = set_visio_page(
+            zip_file_dict[page_filename], page_dict)
         for zip_file in visio_template.infolist():
             zip_filename = zip_file.filename
-            if zip_filename not in page_file_dict:
+            if zip_filename not in zip_file_dict:
                 visio_file.writestr(
                     zip_file, visio_template.read(zip_filename))
             else:
-                visio_file.writestr(zip_filename, page_file_dict[zip_filename])
+                visio_file.writestr(zip_filename, zip_file_dict[zip_filename])
     visio_template.close()
     visio_file.close()
 
