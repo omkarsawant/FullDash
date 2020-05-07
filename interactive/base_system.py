@@ -63,6 +63,15 @@ def activate_modal(obj, modal_key):
     obj.modal_body = MODALS[modal_key]['BODY']
 
 
+def adjust_hostnames(device, closet_record):
+    device_records = device.objects.filter(closet=closet_record)
+    for device_record in device_records:
+        device_hostname_parts = device_record.hostname.split('-')
+        device_record.hostname = device_hostname_parts[0] + '-' + \
+            closet_record.closet + '-' + device_hostname_parts[2]
+        device_record.save()
+
+
 def check_hardware_standards(request, crest):
     site_details = get_site_details(crest)
     meeting_standards = True

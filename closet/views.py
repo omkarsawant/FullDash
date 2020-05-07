@@ -37,13 +37,17 @@ def closet_view(request, *args, **kwargs):
                 closet_floor = form.cleaned_data['floor']
                 form.save(commit=False).delete()
                 remaining_closet_records = Closet.objects.filter(
-                    floor=closet_floor)
+                    site=site_record, floor=closet_floor)
                 closet_record_index = 0
                 for remaining_closet_record in remaining_closet_records:
                     closet_record_number = (closet_record_index % 26) + 1
                     remaining_closet_record.closet = f'{closet_floor:03}{chr(closet_record_number+96)}'
                     closet_record_index = closet_record_index+1
                     remaining_closet_record.save()
+                    base_system.adjust_hostnames(
+                        Router, remaining_closet_record)
+                    base_system.adjust_hostnames(
+                        AccessSwitch, remaining_closet_record)
             base_system.delete_extra_devices(AccessSwitch, Closet.objects.filter(
                 site=site_record, category__in=[Closet.CategoryChoices.MDF]))
             base_system.delete_extra_devices(Router, Closet.objects.filter(
