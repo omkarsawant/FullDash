@@ -10,8 +10,15 @@ from router.models import Router
 ERROR_IMAGE_COUNT = 1
 
 HOSTNAME = 'r{device}{country}{crest:0>4}-{closet}-{instance:03}'
+INTERFACE_DESCRIPTION = '{mode}|{type}|{carrier}|{circuit_id}|{remote_device}|{remote_port}|{user_note}'
+
+COMMUNITIES = {
+    'AM1': '1900:1',
+    'AM2': '1900:1',
+}
 
 DIRECTORIES = {
+    'config': '/static/config/',
     'diagrams': '/static/diagrams/',
     'staging': '/static/staging/',
     'ipam': '/static/ipam/',
@@ -55,6 +62,11 @@ PLACEHOLDERS = {
 DEVICE_TYPES = {
     Router: 'wan',
     AccessSwitch: 'acc',
+}
+
+QOS_POLICIES = {
+    'WAN Ingress': 'CLASSIFY',
+    'WAN Egress': 'WAN_Shape',
 }
 
 
@@ -124,6 +136,37 @@ def get_filename(crest, filetype):
         return str(crest) + '-Network Diagram.vsdx'
     elif filetype == 'ipam':
         return str(crest) + '-IPAM Request.xlsx'
+
+
+def get_interface_description(intr_type, **tokens):
+    # (mode='-', intr_type='-', carrier='-', circuit_id='-', remote_device='-', remote_port='-', user_note='-'):
+    interface_description_data = {
+        'mode': '-',
+        'type': '-',
+        'carrier': '-',
+        'circuit_id': '-',
+        'remote_device': '-',
+        'remote_port': '-',
+        'user_note': '-',
+    }
+    if intr_type == 'loop':
+        interface_description_data['mode'] = 'l3'
+        interface_description_data['type'] = 'rtid'
+        interface_description_data['user_note'] = 'inband-mgt'
+    elif intr_type == 'l3_p2p':
+        interface_description_data['mode'] = 'l3'
+        interface_description_data['type'] = 'p2p'
+        interface_description_data['remote_device'] = tokens['remote_device'].lower(
+        )
+        interface_description_data['remote_port'] = tokens['remote_port'].lower(
+        )
+    elif intr_type == 'wan':
+        interface_description_data['mode'] = 'l3'
+        interface_description_data['type'] = tokens['wan_type'].lower()
+        interface_description_data['carrier'] = tokens['wan_provider'].lower()
+        interface_description_data['circuit_id'] = tokens['circuit_id'].lower(
+        )
+    return INTERFACE_DESCRIPTION.format(**interface_description_data)
 
 
 def get_mdf_device_hostnames(site_record, mdf_closets, device):

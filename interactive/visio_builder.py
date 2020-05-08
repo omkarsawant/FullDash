@@ -64,7 +64,7 @@ def get_zip_filename(filetype, file_number):
 
 
 def get_visio_template_name(site_record, router_records, access_switch_records):
-    return 'Drawing1.vsdx'
+    return 'small.vsdx'
 
 
 def get_background_dict(site_record, diagram_author):

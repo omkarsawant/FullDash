@@ -144,6 +144,9 @@ class AccessSwitchDevice:
                 vlan_record.save()
         self.device_record.save()
 
+    def make_configuration(self):
+        pass
+
 
 def get_vlan_id(site_record, vlan_instance):
     vlan_type = vlan_instance.vlan_type

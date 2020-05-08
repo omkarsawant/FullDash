@@ -82,7 +82,10 @@ def generate_docs(site_record, build_type, diagram_author=None):
         ipam_list_builder(site_record.crest, site_ip_list, site_vlan_list)
     if build_type in ['config', 'all']:
         # TODO: generate other fields
-        pass
+        router_devices[0].make_configurations(supernets, extra_subnets)
+        router_devices[1].make_configurations(supernets, extra_subnets)
+        for access_device in access_devices:
+            access_device.make_configuration()
     if build_type in ['diagram', 'all']:
         visio_builder(site_record, closet_records, diagram_author)
 

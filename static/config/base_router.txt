@@ -1,0 +1,171 @@
+!!--Commands
+
+!!--Privileged Execution Mode
+enable
+!
+!
+!!--Configure Mode
+configure terminal
+!
+!
+!!--Hostname
+hostname <HOSTNAME>
+!
+!
+!!--Branch Version Identification ACL
+ip access-list extended branch-office
+ remark Branch Office 3.0
+!
+!
+!!--Multicast
+ip multicast-routing distributed
+!
+!
+!!--Path MTU Discovery
+ip tcp path-mtu-discovery
+!
+!
+!!--Loopback Interface
+interface Loopback0
+ ip address <LOOPBACK_IP> 255.255.255.255
+ description <LOOPBACK_DESC>
+!
+!
+!!--NetFlow
+<NETFLOW>
+!!--LLDP Enable
+lldp run
+!
+!
+!!--QoS Policy
+<QoS>
+!
+!
+!!--Downlinks to LAN
+interface <DN_1_INTR>
+ description <DN_1_DESC>
+ ip address <DN_1_IP> 255.255.255.254
+ ip ospf cost 10
+ ip ospf network point-to-point
+ logging event link-status
+ dampening
+ cdp enable
+ load-interval 30
+ ip pim sparse-mode
+ service-policy input <QoS_INGRESS>
+ no shutdown
+!
+interface <DN_2_INTR>
+ description <DN_2_DESC>
+ ip address <DN_2_IP> 255.255.255.254
+ ip ospf cost 10
+ ip ospf network point-to-point
+ logging event link-status
+ dampening
+ cdp enable
+ load-interval 30
+ ip pim sparse-mode
+ service-policy input <QoS_INGRESS>
+ no shutdown
+!
+!
+!!--Links to Other Router
+interface <IN_1_INTR>
+ description <IN_1_DESC>
+ ip address <IN_1_IP> 255.255.255.254
+ bfd interval 500 min_rx 500 multiplier 3
+ ip ospf bfd
+ logging event link-status
+ dampening
+ cdp enable
+ load-interval 30
+ ip pim sparse-mode
+ no shutdown
+!
+interface <IN_2_INTR>
+ description <IN_2_DESC>
+ ip address <IN_2_IP> 255.255.255.254
+ bfd interval 500 min_rx 500 multiplier 3
+ ip ospf bfd
+ logging event link-status
+ dampening
+ cdp enable
+ load-interval 30
+ ip pim sparse-mode
+ no shutdown
+!
+!
+!!--Link to WAN
+interface <WAN_INTR>
+ description <WAN_DESC>
+ ip address <WAN_IP> <WAN_MASK>
+ bandwidth <WAN_BW>
+ bfd interval 500 min_rx 500 multiplier 3
+ no ip redirect
+ ip flow monitor AIG_Default_In_Monitor input
+ ip flow monitor AIG_Default_Out_Monitor output
+ logging event link-status
+ dampening
+ no cdp enable
+ no lldp transmit
+ no lldp receive
+ load-interval 30
+ ip pim sparse-mode
+ service-policy output <QoS_EGRESS>
+ no shutdown
+!
+!
+!!--Static Summary Routes<SUPERNETS>
+!
+!
+!!--Route Filtering
+ip as-path access-list 1 permit ^$
+!
+ route-map ebgp-out permit 10
+ match as-path 1
+ set community <COMMUNITY>
+!
+!
+!!--BGP
+ip bgp-community new-format
+router bgp <LOCAL_ASN>
+ bgp router-id <LOOPBACK_IP>
+ bgp log-neighbor-changes
+ bgp update-delay 1
+ no auto-summary
+ no synchronization
+ bgp transport path-mtu-discovery<NETWORKS>
+!
+ neighbor ibgp-<LOCAL_ASN> peer-group
+ neighbor ibgp-<LOCAL_ASN> remote-as <LOCAL_ASN>
+ neighbor ibgp-<LOCAL_ASN> next-hop-self
+ neighbor ibgp-<LOCAL_ASN> update-source Loopback0
+ neighbor ibgp-<LOCAL_ASN> soft-reconfiguration inbound
+ neighbor ibgp-<LOCAL_ASN> send-community
+ neighbor ibgp-<LOCAL_ASN> fall-over bfd
+ neighbor <IBGP_PEER_LOOPBACK_IP> peer-group ibgp-<LOCAL_ASN>
+ neighbor <IBGP_PEER_LOOPBACK_IP> description branch|ibgp|p2p|<IBGP_PEER_HOSTNAME>
+!
+ neighbor <ISP_IP> remote-as <REMOTE_ASN>
+ neighbor <ISP_IP> description branch|ebgp|<WAN_TYPE>|<WAN_PROVIDER>
+ neighbor <ISP_IP> send-community
+ neighbor <ISP_IP> fall-over bfd
+ neighbor <ISP_IP> soft-reconfiguration inbound
+ neighbor <ISP_IP> route-map ebgp-out out
+!
+!
+!!--OSPF
+router ospf 1
+ router-id <LOOPBACK_IP>
+ passive-interface <WAN_INTR>
+ default-information originate metric 10 metric-type 2
+ network <LOOPBACK_IP> 0.0.0.0 area 0
+ network <IN_1_IP> 0.0.0.0 area 0
+ network <IN_2_IP> 0.0.0.0 area 0
+ network <DN_1_IP> 0.0.0.0 area 0
+ network <DN_2_IP> 0.0.0.0 area 0
+ log-adjacency-changes
+!
+!
+!!--Device Management
+<DEVICE_MANAGEMENT>
