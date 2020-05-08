@@ -1,0 +1,68 @@
+!'====================================================================
+!                                                 Queueing Class-maps
+!'====================================================================
+!
+class-map match-any Network
+  description ***Network_Protocols***
+  match dscp cs6 cs7
+class-map match-any Voice
+  description ***Voice RTP***
+  match ip dscp EF
+class-map match-any Video
+  description ***Video RTP***
+  match dscp cs4  af41  af42  af43 
+class-map match-any Control_Traffic
+  description ***Control and Signaling***
+  match dscp cs3  af31  af32  af33 
+class-map match-any Business_Critical
+  description *** Business  Critical Class***
+  match dscp cs2  af21  af22  af23 
+class-map match-any Bulk
+  description ***Scavenger FTP,SFTP,SCP***
+  match dscp af11  af12  af13 
+class-map match-any default
+  match dscp 0
+!
+!====================================================================
+!                                                   Queuing Policy-map
+!====================================================================
+!
+policy-map WAN_Queue
+description ** WAN Egress QoS Queuing Policy - v3.3**
+  class Voice
+    priority percent 20
+!
+  class Network
+   bandwidth remaining percent 1
+  class Video
+   bandwidth remaining percent 20
+   random-detect dscp-based
+   random-detect exponential-weighting-constant 15
+   random-detect dscp 34 512 768
+   random-detect dscp 36 256 384
+    queue-limit 1000 packets
+  class Control_Traffic
+   bandwidth remaining percent 10
+  class Business_Critical
+   bandwidth remaining percent 20
+    queue-limit 1000 packets
+!
+  class Bulk
+   bandwidth remaining percent 9
+   random-detect dscp-based
+   random-detect exponential-weighting-constant 5
+   random-detect dscp 10 512 768 
+   random-detect dscp 12 256 384 
+class class-default
+   bandwidth remaining percent 40
+    queue-limit 1000 packets
+!
+!'====================================================================
+!                                                     Shaping Policy-map
+!====================================================================
+!
+policy-map WAN_Shape
+ description ** Outbound Shaping policy **
+ class class-default
+  shape average 200000000 account user-defined 18 
+  service-policy WAN_Queue

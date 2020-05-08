@@ -1,0 +1,250 @@
+!====================================================================
+!                                            Classification - Access-lists
+!====================================================================
+#---------------------------------------------------------------------
+#Voice RTP stream - DSCP value (EF)
+#---------------------------------------------------------------------
+ip access-list extended QoS_Voice
+ remark ** QoS Version 3.3 **
+ remark ** Match Voice Traffic **
+ remark ** Avaya Audio **
+  permit udp any any range 2048 3329 dscp ef
+  permit udp any range 2048 3329 any dscp ef 
+ remark ** Realtime Port Range **
+  permit udp any any range 16384 32767 dscp ef
+  permit udp any range 16384 32767 any dscp ef
+ remark ** Webex Teams Audio **
+  permit udp any range 52000 52099 any dscp ef
+  permit udp any any range 52000 52099 dscp ef
+  permit udp any range 52500 62999 any dscp ef
+  permit udp any any range 52500 62999 dscp ef
+ remark ** Lync/Skype Audio **
+  permit tcp any any range 10600 10639 dscp ef
+  permit tcp any range 10600 10639 any dscp ef
+  permit udp any any range 10600 10639 dscp ef
+  permit udp any range 10600 10639 any dscp ef  
+!
+#---------------------------------------------------------------------
+#Video RTP stream - DSCP value (AF41/AF42)
+#---------------------------------------------------------------------
+ip access-list extended QoS_TP_Video
+ remark ** Match TP Video  Traffic **
+  permit udp any any range 16384 32767 dscp 32
+  permit udp any range 16384 32767 any dscp 32
+  permit udp any any range 16384 32767 dscp af41
+  permit udp any range 16384 32767 any dscp af41
+ remark ** Webex Teams Video **
+  permit udp any range 52100 52299 any dscp af41
+  permit udp any any range 52100 52299 dscp af41
+  permit udp any range 63000 65500 any dscp af41
+  permit udp any any range 63000 65500 dscp af41
+  permit udp any eq 9000 any dscp af41
+  permit udp any any eq 9000 dscp af41
+!
+ip access-list extended QoS_UC_Video
+ remark ** Match UC Video **
+ remark ** Skype/Lync Video **
+  permit tcp any range 10700 10739 any dscp af42
+  permit tcp any any range 10700 10739 dscp af42
+  permit udp any any range 10700 10739 dscp af42
+  permit udp any range 10700 10739 any  dscp af42
+ remark ** Avaya 2N Video Intercom **
+  permit udp any any range 4900 4963 dscp af42
+  permit udp any range 4900 4963 any  dscp af42
+!
+#---------------------------------------------------------------------
+# Signaling and control Traffic - DSCP value (CS3)
+#---------------------------------------------------------------------
+ip access-list extended QoS_Signaling
+ remark ** Match Audio/Video Signaling **
+ remark ** Match Cisco SCCP **
+  permit tcp any any range 2000 2002
+  permit tcp any range 2000 2002 any
+ remark ** Match H.323 Traffic **
+  permit tcp any any range 1719 1720 
+  permit tcp any range 1719 1720 any
+  permit udp any any eq 1719
+  permit udp any eq 1719 any
+  permit udp any any eq 6001
+  permit udp any eq 6001 any
+ remark ** Match SIP Traffic **
+  permit tcp any any range 5060 5071 
+  permit tcp any range 5060 5071 any 
+  permit udp any any range 5060 5071 
+  permit udp any range 5060 5071 any 
+  permit tcp any any range 25000 29999 dscp 24
+  permit tcp any range 25000 29999 any dscp 24
+  permit tcp any any eq 7001
+  permit tcp any eq 7001 any
+remark ** Match TACACS Traffic **
+  permit tcp any any eq 49
+permit tcp any eq 49 any
+ remark ** Match LDAP Traffic **
+ permit tcp any any eq 636
+ permit tcp any eq 636 any
+ permit tcp any any eq 389
+ permit tcp any eq 389 any
+ remark ** Match SNMP Traffic **
+ permit udp any any eq snmp
+ permit udp any eq snmp any
+ permit udp any any eq snmptrap
+ permit udp any eq snmptrap any
+ permit tcp any any eq 162
+ permit tcp any eq 162 any
+ remark ** Match RADIUS Traffic **
+ permit udp any any eq 1812
+ permit udp any eq 1812 any
+ permit udp any any eq 1813
+ permit udp any eq 1813 any
+ permit udp any any eq 1645
+ permit udp any eq 1645 any
+ permit udp any any eq 1646
+ permit udp any eq 1646 any
+ remark ** Match HREAP/CAPWAP Traffic **
+  permit udp any any eq 5246 
+  permit udp any eq 5246 any
+ remark ** Match Syslog Traffic **
+  permit udp any any eq 514
+  permit udp any eq 514 any
+ remark ** Match DNS Traffic **
+ permit udp any any eq domain
+ permit udp any eq domain any
+!
+#---------------------------------------------------------------------
+#Bulk Hi Queue- (AF11)
+#---------------------------------------------------------------------
+!
+ip access-list extended QoS_Bulk_Hi
+ remark ** Match Bulk Traffic - High Queue  **
+ remark ** Match FTP Traffic ** 
+  permit tcp any any eq ftp
+  permit tcp any eq ftp any
+  permit tcp any any eq ftp-data
+  permit tcp any eq ftp-data any
+ remark ** Match Citrix Bulk **
+  permit tcp any any eq 2600
+  permit tcp any eq 2600 any
+remark ** Match SMB Traffic **
+permit tcp any any eq 445
+permit tcp any eq 445 any
+remark **Isilon Workers**
+permit tcp any any eq 5667
+permit tcp any eq 5667 any
+!
+#---------------------------------------------------------------------
+#Bulk Low Queue- (AF12)
+#---------------------------------------------------------------------
+!
+ip access-list extended QoS_Bulk_Low
+ remark ** Match Bulk Traffic - Low Queue  **
+ remark ** Match Avamar Backup **
+  permit tcp any any range 28001 28002
+  permit tcp any range 28001 28002 any
+  permit tcp any any eq 2051
+  permit tcp any eq 2051 any
+ remark ** Match Networker Backup **
+  permit tcp any any range 7937 7938
+  permit tcp any range 7937 7938 any
+ remark ** Match EMC Recovery Point **
+  permit tcp any any eq 5040
+  permit tcp any eq 5040 any
+  permit udp any any eq 5040
+  permit udp any eq 5040 any
+!
+#---------------------------------------------------------------------
+#Normal_Business Class - (AF21)
+#---------------------------------------------------------------------
+!
+ip access-list extended QoS_Business_Critical
+ remark ** Match Business Critical Traffic  **
+ remark ** Match Citrix/VDI (Single-Stream/Interactive) **
+  permit tcp any any eq 1494
+  permit tcp any eq 1494 any
+  permit tcp any any eq 2598
+  permit tcp any eq 2598 any
+  permit udp any any eq 1494
+  permit udp any eq 1494 any
+ remark ** Match PCoIP Traffic **
+  permit tcp any any eq 4172
+  permit tcp any eq 4172 any
+---------------------------------------------------------------------
+#Meraki Head-End Tunnel Traffic - Trust
+--------------------------------------------------------------------- 
+ip access-list extended QoS_Meraki_SDWAN 
+ remark ** Meraki SDWAN Voice ** 
+  permit ip host 10.96.248.30 any
+  permit ip any host 10.96.248.30 
+  permit ip host 10.93.24.30 any
+  permit ip any host 10.93.24.30
+  permit ip host 10.116.44.188 any
+  permit ip any host 10.116.44.188
+  permit ip host 10.116.97.28 any
+  permit ip any host 10.116.97.28
+  permit ip host 10.53.59.92 any 
+  permit ip any host 10.53.59.92 
+  permit ip host 10.48.100.48 any
+  permit ip any host 10.48.100.48
+  permit ip host 10.25.238.115 any
+  permit ip any host 10.25.238.115
+  permit ip host 10.30.239.91 any
+  permit ip any host 10.30.239.91
+#---------------------------------------------------------------------
+#Default - (0)
+#---------------------------------------------------------------------
+!
+! Implict CATCH_ALL queue
+
+!====================================================================
+!                                          Classification Class-maps
+!====================================================================
+!
+class-map match-any Voice_Mark
+ description ***Voice RTP***
+match access-group name QoS_Voice
+class-map match-any TP_Video_Mark
+ description ***Telepresence Video***
+ match access-group name QoS_TP_Video
+class-map match-any UC_Video_Mark
+ description ***UC Video***
+ match access-group name QoS_UC_Video
+class-map match-any Control_Mark
+ description ***Signalling and Control  ***
+ match access-group name QoS_Signaling
+class-map match-any Bulk_Hi_Mark
+ description ***Bulk/Scavenger Hi***
+  match access-group name QoS_Bulk_Hi
+class-map match-any Bulk_Low_Mark
+ description ***Bulk/Scavenger Low***
+  match access-group name QoS_Bulk_Low
+class-map match-any Business_Critical_Mark
+ description ***Business Critical ***
+  match access-group name QoS_Business_Critical
+class-map match-any Meraki_SDWAN_Trust
+ description ***Meraki Headend VPN***
+   match access-group name QoS_Meraki_SDWAN
+
+!====================================================================
+!                                          Classification Policy-Map
+!====================================================================
+!
+! The Following Policy gets all end user switchports
+policy-map CLASSIFY
+class Voice_Mark
+  set ip dscp EF
+class TP_Video_Mark
+  set ip dscp AF41
+class UC_Video_Mark
+  set ip dscp AF42
+class Control_Mark
+  set ip dscp AF31
+class Bulk_Hi_Mark
+  set ip dscp AF11
+class Bulk_Low_Mark
+  set ip dscp AF12
+class Business_Critical_Mark
+  set ip dscp AF21
+class Meraki_SDWAN_Trust
+!
+class class-default
+  set ip dscp default
+!

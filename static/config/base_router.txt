@@ -38,7 +38,8 @@ lldp run
 !
 !
 !!--QoS Policy
-<QoS>
+<QoS_WAN_INGRESS>
+<QoS_WAN_EGRESS>
 !
 !
 !!--Downlinks to LAN

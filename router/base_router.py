@@ -194,11 +194,11 @@ class RouterDevice:
             supernets_string = supernets_string + \
                 f'\nip route {supernet_obj.network_address} {supernet_obj.netmask} Null0 200'
             networks_string = networks_string + \
-                f'\nnetwork {supernet_obj.network_address} mask {supernet_obj.netmask}'
+                f'\n network {supernet_obj.network_address} mask {supernet_obj.netmask}'
         for extra_subnet in extra_subnets:
             extra_subnet_obj = IPv4Network(extra_subnet)
             networks_string = networks_string + \
-                f'\nnetwork {extra_subnet_obj.network_address} mask {extra_subnet_obj.netmask}'
+                f'\n network {extra_subnet_obj.network_address} mask {extra_subnet_obj.netmask}'
         base_config_dict['<HOSTNAME>'] = self.device_record.hostname
         base_config_dict['<LOOPBACK_IP>'] = self.device_record.loopback_ip
         base_config_dict['<LOOPBACK_DESC>'] = base_system.get_interface_description(
