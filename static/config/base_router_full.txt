@@ -56,6 +56,19 @@ interface <DN_1_INTR>
  service-policy input <QoS_INGRESS_NAME>
  no shutdown
 !
+interface <DN_2_INTR>
+ description <DN_2_DESC>
+ ip address <DN_2_IP> 255.255.255.254
+ ip ospf cost 10
+ ip ospf network point-to-point
+ logging event link-status
+ dampening
+ cdp enable
+ load-interval 30
+ ip pim sparse-mode
+ service-policy input <QoS_INGRESS_NAME>
+ no shutdown
+!
 !
 !!--Links to Other Router
 interface <IN_1_INTR>
@@ -151,6 +164,7 @@ router ospf 1
  network <IN_1_IP> 0.0.0.0 area 0
  network <IN_2_IP> 0.0.0.0 area 0
  network <DN_1_IP> 0.0.0.0 area 0
+ network <DN_2_IP> 0.0.0.0 area 0
  log-adjacency-changes
 !
 !

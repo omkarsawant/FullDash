@@ -29,7 +29,7 @@ class SubnetPlanner:
         if not subnet:
             self.supernet_breakdown_archive.extend(self.supernet_breakdown)
             self.supernet_breakdown = None
-            self.assign_subnet(prefix_length)
+            return self.assign_subnet(prefix_length)
         else:
             remaining_supernet = list(supernet.address_exclude(subnet))
             self.adjust_subnet_breakdown(

@@ -1,0 +1,1 @@
+switch <SWI_NUM> priority <SWI_PRI>

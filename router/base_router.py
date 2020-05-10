@@ -169,7 +169,7 @@ class RouterDevice:
                         'l3_p2p', remote_device=downlink_devices[1].device_record.hostname, remote_port=downlink_devices[1].uplink_intrs[1])
         self.device_record.save()
 
-    def make_configurations(self, supernets, extra_subnets):
+    def make_configuration(self, supernets, extra_subnets):
         base_config_dict = {}
         base_config_file = open(
             BASE_DIR + base_system.DIRECTORIES['config'] + 'base_router.txt', 'r')
@@ -187,8 +187,10 @@ class RouterDevice:
             '<SITE_ADDRESS>', self.site_record.address)
         netflow_file = open(
             BASE_DIR + base_system.DIRECTORIES['config'] + 'netflow_' + self.site_record.nearest_dc + '.txt', 'r')
-        qos_file = open(
-            BASE_DIR + base_system.DIRECTORIES['config'] + 'qos.txt', 'r')
+        qos_wan_ingress_file = open(
+            BASE_DIR + base_system.DIRECTORIES['config'] + 'qos_wan_ingress.txt', 'r')
+        qos_wan_egress_file = open(
+            BASE_DIR + base_system.DIRECTORIES['config'] + 'qos_wan_egress.txt', 'r')
         for supernet in supernets:
             supernet_obj = IPv4Network(supernet)
             supernets_string = supernets_string + \
@@ -205,8 +207,10 @@ class RouterDevice:
             'loop')
         base_config_dict['<NETFLOW>'] = netflow_file.read()
         netflow_file.close()
-        base_config_dict['<QoS>'] = qos_file.read()
-        qos_file.close()
+        base_config_dict['<QoS_INGRESS_DEFINITION>'] = qos_wan_ingress_file.read()
+        qos_wan_ingress_file.close()
+        base_config_dict['<QoS_EGRESS_DEFINITION>'] = qos_wan_egress_file.read()
+        qos_wan_egress_file.close()
         base_config_dict['<DN_1_INTR>'] = self.downlink_intrs[0]
         base_config_dict['<DN_1_DESC>'] = self.device_record.downlink_1_desc
         base_config_dict['<DN_1_IP>'] = self.device_record.downlink_1_ip
@@ -214,7 +218,7 @@ class RouterDevice:
             base_config_dict['<DN_2_INTR>'] = self.downlink_intrs[1]
             base_config_dict['<DN_2_DESC>'] = self.device_record.downlink_2_desc
             base_config_dict['<DN_2_IP>'] = self.device_record.downlink_2_ip
-        base_config_dict['<QoS_INGRESS>'] = base_system.QOS_POLICIES['WAN Ingress']
+        base_config_dict['<QoS_INGRESS_NAME>'] = base_system.QOS_POLICIES['WAN Ingress']
         base_config_dict['<IN_1_INTR>'] = self.interlink_intrs[0]
         base_config_dict['<IN_1_DESC>'] = self.device_record.interlink_1_desc
         base_config_dict['<IN_1_IP>'] = self.device_record.interlink_1_ip
@@ -227,7 +231,7 @@ class RouterDevice:
         base_config_dict['<WAN_IP>'] = str(wan_link_cidr.ip)
         base_config_dict['<WAN_MASK>'] = str(wan_link_cidr.network.netmask)
         base_config_dict['<WAN_BW>'] = str(self.device_record.port_bw)
-        base_config_dict['<QoS_EGRESS>'] = base_system.QOS_POLICIES['WAN Egress']
+        base_config_dict['<QoS_EGRESS_NAME>'] = base_system.QOS_POLICIES['WAN Egress']
         base_config_dict['<SUPERNETS>'] = supernets_string
         base_config_dict['<COMMUNITY>'] = base_system.COMMUNITIES[self.site_record.nearest_dc]
         base_config_dict['<LOCAL_ASN>'] = str(self.device_record.local_asn)

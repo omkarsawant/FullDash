@@ -1,0 +1,3 @@
+vlan <VLAN_ID>
+ name <VLAN_NAME>
+!

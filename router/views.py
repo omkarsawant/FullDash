@@ -4,6 +4,8 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 
+from ipaddress import IPv4Network
+
 from closet.models import Closet
 from interactive import base_system
 from onboard.models import Site
@@ -77,13 +79,17 @@ def wan_green_view(request, *args, **kwargs):
             router_2_record = obj.sub_form.save(commit=False)
             router_1_record.hostname = obj.router_hostnames[0]
             router_2_record.hostname = obj.router_hostnames[1]
+            router_1_record.isp_ip = str(IPv4Network(
+                router_1_record.wan_link_cidr, False)[1])
+            router_2_record.isp_ip = str(IPv4Network(
+                router_2_record.wan_link_cidr, False)[1])
+            router_2_record.local_asn = obj.form.cleaned_data['local_asn']
             if len(mdf_closet_records) == 1:
                 router_1_record.closet = mdf_closet_records[0]
                 router_2_record.closet = mdf_closet_records[0]
             else:
                 router_1_record.closet = mdf_closet_records[0]
                 router_2_record.closet = mdf_closet_records[1]
-            router_2_record.local_asn = obj.form.cleaned_data['local_asn']
             router_1_record.save()
             router_2_record.save()
         base_system.set_form_errors(request, obj.form, obj.sub_form)

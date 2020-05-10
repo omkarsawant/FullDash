@@ -1,0 +1,15 @@
+interface range <INTR>
+ switchport mode access
+ description <INTR_DESC>
+ switchport access vlan <ACCESS_VLAN><VOICE_STATEMENT>
+ speed auto
+ duplex auto
+ spanning-tree portfast
+ storm-control broadcast level 4.00 2.00
+ snmp trap mac-notification change added
+ snmp trap mac-notification change removed
+ no snmp trap link-status
+ no logging event link-status
+ no logging event power-inline-status<QoS_STATEMENT>
+ no shutdown
+ !

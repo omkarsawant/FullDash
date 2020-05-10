@@ -1,11 +1,15 @@
 from django.contrib import messages
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.encoding import smart_str
+from os import remove
 
 from .forms import BuildForm, ExcludedSubnetCreateFormset, OverviewForm, SupernetCreateFormset
 from .models import ExcludedSubnet, Supernet
 from interactive import base_system, generate_docs
 from onboard.models import Site
+from interactive.settings import BASE_DIR
 
 
 def build_view(request, *args, **kwargs):
@@ -42,7 +46,17 @@ def build_view(request, *args, **kwargs):
                 return render(request, template_name, {'obj': obj})
         obj.build_form = BuildForm(request.POST, initial={
                                    'build_output': build_output})
-        return render(request, template_name, {'obj': obj})
+        gda_zip_filename = BASE_DIR + \
+            base_system.DIRECTORIES['staging'] + \
+            base_system.get_filename(site_record.crest, 'zip')
+        gda_zip_file = open(gda_zip_filename, 'rb')
+        http_response = HttpResponse(
+            gda_zip_file.read(), content_type='application/zip')
+        http_response['Content-Disposition'] = 'attachment; filename="foo.zip"'
+        gda_zip_file.close()
+        remove(gda_zip_filename)
+        return http_response
+        # return render(request, template_name, {'obj': obj})
 
 
 def overview_view(request, *args, **kwargs):

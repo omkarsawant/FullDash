@@ -128,7 +128,7 @@ class AccessListingForm(forms.Form):
     def __init__(self, *args, site_record, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['closet'].queryset = Closet.objects.filter(
-            site=site_record).values_list('closet', flat=True)
+            site=site_record).exclude(category=Closet.CategoryChoices.MDF).values_list('closet', flat=True)
         self.fields['closet'].widget.attrs['style'] = 'width:1.5in'
 
     closet = forms.ModelChoiceField(

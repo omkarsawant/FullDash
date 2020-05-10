@@ -1,6 +1,8 @@
 from ipaddress import IPv4Interface, IPv4Network
-
-from .models import AccessSwitch, Vlan
+from interactive import base_system
+from interactive.settings import BASE_DIR
+from .models import AccessPortBlock, AccessSwitch, Vlan
+from closet.models import Closet
 
 ACCESS_SWITCH_SPECS = {
     'MGIG_STACK': {
@@ -33,10 +35,20 @@ DNS_SUFFIX = '.network.aig.net'
 
 
 class AccessSwitchDevice:
-    def __init__(self, site_record, access_switch_record):
+    def __init__(self, site_record, access_switch_record, uplink_devices):
         self.site_record = site_record
         self.device_record = access_switch_record
         self.access_switch_model = self.device_record.stack_model
+        self.uplink_devices = uplink_devices
+        if self.site_record.signal_present_core:
+            self.uplink_type = 'core'
+        else:
+            other_access_switch_record = AccessSwitch.objects.filter(
+                closet__in=Closet.objects.filter(site=site_record)).exclude(id=self.device_record.id)
+            if other_access_switch_record and other_access_switch_record.id < self.device_record.id:
+                self.uplink_type = 'router_secondary'
+            else:
+                self.uplink_type = 'router_primary'
         self.vlan_records = Vlan.objects.filter(
             access_switch=self.device_record)
         self.required_prefixes = []
@@ -78,23 +90,23 @@ class AccessSwitchDevice:
                 self.required_prefixes.append(prefix_length)
                 return True
 
-    def get_ip_requirements(self, uplink_type, *uplink_devices):
+    def get_ip_requirements(self):
         self.preconfigured_subnets = []
         self.required_prefixes = [] if self.device_record.loopback_ip else [32]
-        if uplink_type == 'router_primary':
-            if not self.check_connection(self.device_record.uplink_1_ip, uplink_devices[0].device_record.downlink_1_ip, 31):
+        if self.uplink_type == 'router_primary':
+            if not self.check_connection(self.device_record.uplink_1_ip, self.uplink_devices[0].device_record.downlink_1_ip, 31):
                 raise AttributeError('')  # TODO: get error from base_system
-            if not self.check_connection(self.device_record.uplink_2_ip, uplink_devices[1].device_record.downlink_1_ip, 31):
+            if not self.check_connection(self.device_record.uplink_2_ip, self.uplink_devices[1].device_record.downlink_1_ip, 31):
                 raise AttributeError('')  # TODO: get error from base_system
-        if uplink_type == 'router_secondary':
-            if not self.check_connection(self.device_record.uplink_1_ip, uplink_devices[0].device_record.downlink_2_ip, 31):
+        if self.uplink_type == 'router_secondary':
+            if not self.check_connection(self.device_record.uplink_1_ip, self.uplink_devices[0].device_record.downlink_2_ip, 31):
                 raise AttributeError('')  # TODO: get error from base_system
-            if not self.check_connection(self.device_record.uplink_2_ip, uplink_devices[1].device_record.downlink_2_ip, 31):
+            if not self.check_connection(self.device_record.uplink_2_ip, self.uplink_devices[1].device_record.downlink_2_ip, 31):
                 raise AttributeError('')  # TODO: get error from base_system
-        if uplink_type == 'core':
-            if not self.check_connection(self.device_record.uplink_1_ip, uplink_devices[0].device_record.downlink_ip, 31):
+        if self.uplink_type == 'core':
+            if not self.check_connection(self.device_record.uplink_1_ip, self.uplink_devices[0].device_record.downlink_ip, 31):
                 raise AttributeError('')  # TODO: get error from base_system
-            if not self.check_connection(self.device_record.uplink_2_ip, uplink_devices[1].device_record.downlink_ip, 31):
+            if not self.check_connection(self.device_record.uplink_2_ip, self.uplink_devices[1].device_record.downlink_ip, 31):
                 raise AttributeError('')  # TODO: get error from base_system
         for vlan_record in self.vlan_records:
             if vlan_record.svi_ip:
@@ -144,8 +156,211 @@ class AccessSwitchDevice:
                 vlan_record.save()
         self.device_record.save()
 
+    def make_model(self):
+        if self.uplink_type == 'router_primary':
+            if not self.device_record.uplink_1_desc:
+                self.device_record.uplink_1_desc = base_system.get_interface_description(
+                    'l3_p2p', remote_device=self.uplink_devices[0].device_record.hostname, remote_port=self.uplink_devices[0].downlink_intrs[0])
+            if not self.device_record.uplink_2_desc:
+                self.device_record.uplink_2_desc = base_system.get_interface_description(
+                    'l3_p2p', remote_device=self.uplink_devices[1].device_record.hostname, remote_port=self.uplink_devices[1].downlink_intrs[0])
+        if self.uplink_type == 'router_secondary':
+            if not self.device_record.uplink_1_desc:
+                self.device_record.uplink_1_desc = base_system.get_interface_description(
+                    'l3_p2p', remote_device=self.uplink_devices[0].device_record.hostname, remote_port=self.uplink_devices[0].downlink_intrs[1])
+            if not self.device_record.uplink_2_desc:
+                self.device_record.uplink_2_desc = base_system.get_interface_description(
+                    'l3_p2p', remote_device=self.uplink_devices[1].device_record.hostname, remote_port=self.uplink_devices[1].downlink_intrs[1])
+        if self.uplink_type == 'core':
+            if not self.device_record.uplink_1_desc:
+                self.device_record.uplink_1_desc = base_system.get_interface_description(
+                    'l3_p2p', remote_device=self.uplink_devices[0].device_record.hostname, remote_port=self.uplink_devices[0].downlink_intr)
+            if not self.device_record.uplink_2_desc:
+                self.device_record.uplink_2_desc = base_system.get_interface_description(
+                    'l3_p2p', remote_device=self.uplink_devices[1].device_record.hostname, remote_port=self.uplink_devices[1].downlink_intr)
+        self.device_record.save()
+
     def make_configuration(self):
-        pass
+        self.make_model()
+        config_path = BASE_DIR + base_system.DIRECTORIES['config']
+        base_config_dict = {}
+        base_config_file = open(config_path + 'base_switch.txt', 'r')
+        base_config_template = base_config_file.read()
+        base_config_file.close()
+        vlan_string, svi_string = self.get_vlan_svi_strings(config_path)
+        legacy_qos_required, access_ports_string = self.get_access_ports_string(
+            config_path)
+        base_config_dict['<PRIORITIES>'] = self.get_priority_string(
+            config_path)
+        base_config_dict['<HOSTNAME>'] = self.device_record.hostname
+        base_config_dict['<QoS>'] = self.get_qos_policy_string(
+            config_path, legacy_qos_required)
+        base_config_dict['<VLANS>'] = vlan_string
+        base_config_dict['<SVIS>'] = svi_string
+        base_config_dict['<LOOPBACK_IP>'] = self.device_record.loopback_ip
+        base_config_dict['<LOOPBACK_DESC>'] = base_system.get_interface_description(
+            'loop')
+        base_config_dict['<UP_1_INTR>'] = self.uplink_intrs[0]
+        base_config_dict['<UP_1_DESC>'] = self.device_record.uplink_1_desc
+        base_config_dict['<UP_1_IP>'] = self.device_record.uplink_1_ip
+        base_config_dict['<UP_2_INTR>'] = self.uplink_intrs[1]
+        base_config_dict['<UP_2_DESC>'] = self.device_record.uplink_2_desc
+        base_config_dict['<UP_2_IP>'] = self.device_record.uplink_2_ip
+        base_config_dict['<ACCESS_PORTS>'] = access_ports_string
+        base_config_dict['<STUB>'] = self.get_ospf_stub_string(config_path)
+        if self.uplink_type == 'core':
+            base_config_dict['<AREA>'] = str(self.device_record.closet.floor)
+        else:
+            base_config_dict['<AREA>'] = '0'
+        base_config_dict['<DEVICE_MANAGEMENT>'] = self.get_device_management_string(
+            config_path)
+        for key, value in base_config_dict.items():
+            if isinstance(value, str):
+                base_config_template = base_config_template.replace(key, value)
+            else:
+                base_config_template = base_config_template.replace(
+                    key, value.decode())
+        config_file = open(
+            BASE_DIR + base_system.DIRECTORIES['staging'] + self.device_record.hostname + '.txt', 'w')
+        config_file.write(base_config_template)
+        config_file.close()
+
+    def get_access_ports_string(self, config_path):
+        access_ports_file = open(config_path + 'switch_interface.txt', 'r')
+        access_ports_template = access_ports_file.read()
+        access_ports_file.close()
+        access_port_dict = {}
+        legacy_qos_required = False
+        stack_port_names = get_stack_port_names(self.device_record)
+        for access_port_block_record in AccessPortBlock.objects.filter(access_switch=self.device_record):
+            access_vlan = access_port_block_record.access_vlan
+            voice_vlan = access_port_block_record.voice_vlan
+            legacy_qos = access_port_block_record.legacy_qos
+            description_string = base_system.get_interface_description(
+                'access', access_vlan=access_vlan, voice_vlan=voice_vlan)
+            voice_statement_string = self.get_voice_statement_string(
+                config_path, voice_vlan)
+            legacy_qos_required = legacy_qos_required or legacy_qos
+            qos_statement_string = self.get_qos_statement_string(
+                config_path, legacy_qos)
+            for port_index in range(stack_port_names.index((access_port_block_record.start_intr,)*2), stack_port_names.index((access_port_block_record.end_intr,)*2)):
+                access_port_dict[port_index] = access_ports_template.replace(
+                    '<INTR>', stack_port_names[port_index][0])
+                access_port_dict[port_index] = access_port_dict[port_index].replace(
+                    '<INTR_DESC>', description_string)
+                access_port_dict[port_index] = access_port_dict[port_index].replace(
+                    '<ACCESS_VLAN>', str(access_vlan))
+                access_port_dict[port_index] = access_port_dict[port_index].replace(
+                    '<VOICE_STATEMENT>', voice_statement_string)
+                access_port_dict[port_index] = access_port_dict[port_index].replace(
+                    '<QoS_STATEMENT>', qos_statement_string)
+        access_port_string = ''
+        for access_port_value in access_port_dict.values():
+            access_port_string = access_port_string + '\n' + access_port_value
+        return legacy_qos_required, access_port_string
+
+    def get_qos_policy_string(self, config_path, legacy_qos_required):
+        qos_policy_string = ''
+        if legacy_qos_required:
+            qos_policy_file = open(config_path + 'qos_lan_ingress.txt', 'r')
+            qos_policy_string = qos_policy_file.read()
+            qos_policy_file.close()
+        return qos_policy_string
+
+    def get_voice_statement_string(self, config_path, voice_vlan):
+        voice_statement_string = ''
+        if voice_vlan:
+            voice_statement_file = open(
+                config_path + 'switch_voice.txt', 'r')
+            voice_statement_template = voice_statement_file.read()
+            voice_statement_file.close()
+            voice_statement_string = '\n' + voice_statement_template.replace(
+                '<VOICE_VLAN>', str(voice_vlan))
+        return voice_statement_string
+
+    def get_qos_statement_string(self, config_path, legacy_qos):
+        qos_string = ''
+        if legacy_qos:
+            qos_statement_file = open(
+                config_path + 'qos_statement.txt', 'r')
+            qos_statement_template = qos_statement_file.read()
+            qos_statement_file.close()
+            qos_string = qos_statement_template.replace('<FLOW>', 'output')
+            qos_string = qos_string.replace(
+                '<QoS_POLICY>', base_system.QOS_POLICIES['LAN Ingress'])
+        return qos_string
+
+    def get_priority_string(self, config_path):
+        priority_file = open(config_path + 'switch_priority.txt', 'r')
+        priority_template = priority_file.read()
+        priority_file.close()
+        priority_string = ''
+        priority_start = 15
+        for switch_number in range(self.device_record.switch_count):
+            string_segment = priority_template.replace(
+                '<SWI_NUM>', str(switch_number+1))
+            switch_priority = priority_start-switch_number
+            if switch_priority > 13:
+                string_segment = string_segment.replace(
+                    '<SWI_PRI>', str(switch_priority))
+            else:
+                string_segment = string_segment.replace('<SWI_PRI>', '1')
+            priority_string = priority_string + '\n' + string_segment
+        return priority_string
+
+    def get_vlan_svi_strings(self, config_path):
+        vlan_file = open(config_path + 'switch_vlan.txt', 'r')
+        vlan_template = vlan_file.read()
+        vlan_file.close()
+        svi_file = open(config_path + 'switch_svi.txt', 'r')
+        svi_template = svi_file.read()
+        svi_file.close()
+        vlan_string = ''
+        svi_string = ''
+        for vlan_record in Vlan.objects.filter(access_switch=self.device_record):
+            vlan_id_str = str(vlan_record.vlan_id)
+            string_segment_vlan = vlan_template.replace(
+                '<VLAN_ID>', vlan_id_str)
+            string_segment_vlan = string_segment_vlan.replace(
+                '<VLAN_NAME>', vlan_record.name)
+            vlan_string = vlan_string + '\n' + string_segment_vlan
+            string_segment_svi = svi_template.replace('<VLAN_ID>', vlan_id_str)
+            string_segment_svi = string_segment_svi.replace('<VLAN_DESC>', base_system.get_interface_description(
+                'vlan', vlan_note=vlan_record.vlan_type+str(vlan_record.vlan_id)))
+            string_segment_svi = string_segment_svi.replace(
+                '<VLAN_IP>', vlan_record.svi_ip)
+            string_segment_svi = string_segment_svi.replace('<VLAN_MASK>', str(
+                IPv4Network(vlan_record.svi_ip + vlan_record.svi_mask_length, False).netmask))
+            string_segment_svi = string_segment_svi.replace(
+                '<VLAN_HELPERS>', self.get_helper_strings(config_path))
+            svi_string = svi_string + '\n' + string_segment_svi
+        return vlan_string, svi_string
+
+    def get_helper_strings(self, config_path):
+        helper_file = open(config_path + 'ip_helper_' +
+                           self.site_record.nearest_dc + '.txt', 'r')
+        helper_template = helper_file.read()
+        helper_file.close()
+        return '\n' + helper_template
+
+    def get_ospf_stub_string(self, config_path):
+        ospf_stub_file = open(config_path + 'ospf_stub.txt', 'r')
+        ospf_stub_template = ospf_stub_file.read()
+        ospf_stub_file.close()
+        ospf_stub_string = ''
+        if self.uplink_type == 'core':
+            ospf_stub_string = ospf_stub_template.replace(
+                '<AREA>', str(self.device_record.closet.floor))
+        return ospf_stub_string
+
+    def get_device_management_string(self, config_path):
+        management_file = open(
+            config_path + 'management_switch_' + self.site_record.nearest_dc + '.txt', 'r')
+        management_template = management_file.read()
+        management_file.close()
+        management_template = management_template.replace(
+            '<SITE_ADDRESS>', self.site_record.address)
+        return management_template
 
 
 def get_vlan_id(site_record, vlan_instance):

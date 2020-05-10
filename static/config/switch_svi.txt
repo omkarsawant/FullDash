@@ -1,0 +1,12 @@
+interface vlan <VLAN_ID>
+ description <VLAN_DESC>
+ ip address <VLAN_IP> <VLAN_MASK><VLAN_HELPERS>
+ no ip redirects
+ no ip proxy-arp
+ no snmp trap link-status
+ no logging event link-status
+ arp timeout 200
+ ip pim sparse-mode
+ ip igmp version 2
+ no shutdown
+!

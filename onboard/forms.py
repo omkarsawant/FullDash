@@ -39,5 +39,6 @@ class OnboardDetailForm(forms.ModelForm):
         self.fields['project_type'].widget.attrs.update(readonly=True)
         self.fields['crest'].widget.attrs.update(readonly=True)
         self.fields['address'].widget.attrs.update(readonly=True)
+        self.fields['address'].widget.attrs['size'] = 64
         self.fields['capacity'].widget.attrs.update(readonly=True)
         self.fields['headcount'].widget.attrs.update(readonly=True)

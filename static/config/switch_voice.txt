@@ -1,0 +1,1 @@
+ switchport voice vlan <VOICE_VLAN>

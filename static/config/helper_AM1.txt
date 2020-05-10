@@ -1,4 +1,0 @@
-ip helper-address 10.93.28.5
-ip helper-address 10.96.252.5
-ip helper-address 198.84.34.18
-ip helper-address 198.84.34.13

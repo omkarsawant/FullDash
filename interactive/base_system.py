@@ -67,6 +67,7 @@ DEVICE_TYPES = {
 QOS_POLICIES = {
     'WAN Ingress': 'CLASSIFY',
     'WAN Egress': 'WAN_Shape',
+    'LAN Ingress': 'Egress_Buffers'
 }
 
 
@@ -136,10 +137,11 @@ def get_filename(crest, filetype):
         return str(crest) + '-Network Diagram.vsdx'
     elif filetype == 'ipam':
         return str(crest) + '-IPAM Request.xlsx'
+    elif filetype == 'zip':
+        return str(crest) + '-GDA2 Documents.zip'
 
 
 def get_interface_description(intr_type, **tokens):
-    # (mode='-', intr_type='-', carrier='-', circuit_id='-', remote_device='-', remote_port='-', user_note='-'):
     interface_description_data = {
         'mode': '-',
         'type': '-',
@@ -149,10 +151,22 @@ def get_interface_description(intr_type, **tokens):
         'remote_port': '-',
         'user_note': '-',
     }
-    if intr_type == 'loop':
-        interface_description_data['mode'] = 'l3'
-        interface_description_data['type'] = 'rtid'
-        interface_description_data['user_note'] = 'inband-mgt'
+    if intr_type == 'access':
+        interface_description_data['mode'] = 'l2'
+        interface_description_data['type'] = 'acc'
+        if tokens['access_vlan'] > 299 and tokens['access_vlan'] < 399:
+            if tokens['voice_vlan']:
+                interface_description_data['user_note'] = 'user port'
+            else:
+                interface_description_data['user_note'] = 'data port'
+        elif tokens['access_vlan'] == 399:
+            interface_description_data['user_note'] = 'security port'
+        elif tokens['access_vlan'] > 399 and tokens['access_vlan'] < 499:
+            interface_description_data['user_note'] = 'voice device port'
+        elif tokens['access_vlan'] == 499:
+            interface_description_data['user_note'] = 'voice infrastructure port'
+        elif tokens['access_vlan'] > 699 and tokens['access_vlan'] < 800:
+            interface_description_data['user_note'] = 'server port'
     elif intr_type == 'l3_p2p':
         interface_description_data['mode'] = 'l3'
         interface_description_data['type'] = 'p2p'
@@ -160,6 +174,14 @@ def get_interface_description(intr_type, **tokens):
         )
         interface_description_data['remote_port'] = tokens['remote_port'].lower(
         )
+    elif intr_type == 'loop':
+        interface_description_data['mode'] = 'l3'
+        interface_description_data['type'] = 'rtid'
+        interface_description_data['user_note'] = 'inband-mgt'
+    elif intr_type == 'vlan':
+        interface_description_data['mode'] = 'l3'
+        interface_description_data['type'] = 'vlan'
+        interface_description_data['user_note'] = tokens['vlan_note'].lower()
     elif intr_type == 'wan':
         interface_description_data['mode'] = 'l3'
         interface_description_data['type'] = tokens['wan_type'].lower()
@@ -185,13 +207,26 @@ def get_mdf_device_hostnames(site_record, mdf_closets, device):
 
 
 def get_site_details(crest):
-    #TODO: define
-    site_details = dict()
-    site_details['address'] = 'New York/80 Pine'
-    site_details['capacity'] = 800
-    site_details['headcount'] = 600
-    site_details['network_type'] = Site.NetworkTypeChoices.MICRO_BRANCH
-    site_details['nearest_dc'] = Site.NearestDcChoices.AM1
+    # TODO: define
+    site_details = {}
+    if crest == 1002659:
+        site_details['address'] = 'New Jersey/194 South Wood Avenue'
+        site_details['capacity'] = 106
+        site_details['headcount'] = 88
+        site_details['network_type'] = Site.NetworkTypeChoices.SMALL_BRANCH
+        site_details['router'] = Site.RouterChoices.ISR_4331
+        site_details['core'] = Site.CoreChoices.NO_CORE
+        site_details['server'] = Site.ServerChoices.NO_SERVER
+        site_details['nearest_dc'] = Site.NearestDcChoices.AM1
+    else:
+        site_details['address'] = 'Stevens Point/3300 Business Park Drive'
+        site_details['capacity'] = 1255
+        site_details['headcount'] = 941
+        site_details['network_type'] = Site.NetworkTypeChoices.LARGE_BRANCH
+        site_details['router'] = Site.RouterChoices.ISR_4351
+        site_details['core'] = Site.CoreChoices.CATALYST_9500
+        site_details['server'] = Site.ServerChoices.CATALYST_9500
+        site_details['nearest_dc'] = Site.NearestDcChoices.AM1
     return site_details
 
 
@@ -248,5 +283,5 @@ def set_formset_errors(request, *formsets):
 
 
 def set_widget_attributes(fields):
-    #TODO: define
+    # TODO: define
     pass

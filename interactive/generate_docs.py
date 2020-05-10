@@ -1,9 +1,14 @@
 from access import base_access
 from access.models import AccessSwitch
 from closet.models import Closet
+from interactive import base_system
 from overview.models import ExcludedSubnet, Supernet
 from router import base_router
 from router.models import Router
+from .settings import BASE_DIR
+
+from os import listdir, remove
+from zipfile import ZipFile
 
 from .ipam_list_builder import ipam_list_builder
 from .subnet_planner import SubnetPlanner
@@ -16,6 +21,7 @@ def generate_docs(site_record, build_type, diagram_author=None):
     router_records = Router.objects.filter(closet__in=closet_records)
     router_devices = [base_router.RouterDevice(
         site_record, router_records[0], False), base_router.RouterDevice(site_record, router_records[1], True)]
+    access_uplink_devices = router_devices
     # TODO: get core records
     # TODO: get server records
     access_switch_records = AccessSwitch.objects.filter(
@@ -33,10 +39,10 @@ def generate_docs(site_record, build_type, diagram_author=None):
     access_devices = []
     for access_switch_record in access_switch_records:
         access_device = base_access.AccessSwitchDevice(
-            site_record, access_switch_record)
+            site_record, access_switch_record, access_uplink_devices)
         try:
-            combine_ip_requirements(
-                access_device.get_ip_requirements('router_primary', router_devices[0], router_devices[1]), required_prefixes, preconfigured_subnets)
+            combine_ip_requirements(access_device.get_ip_requirements(
+            ), required_prefixes, preconfigured_subnets)
         except AttributeError as error:
             print(error)  # TODO: pass upwards
         access_devices.append(access_device)
@@ -82,12 +88,23 @@ def generate_docs(site_record, build_type, diagram_author=None):
         ipam_list_builder(site_record.crest, site_ip_list, site_vlan_list)
     if build_type in ['config', 'all']:
         # TODO: generate other fields
-        router_devices[0].make_configurations(supernets, extra_subnets)
-        router_devices[1].make_configurations(supernets, extra_subnets)
+        router_devices[0].make_configuration(supernets, extra_subnets)
+        router_devices[1].make_configuration(supernets, extra_subnets)
         for access_device in access_devices:
             access_device.make_configuration()
     if build_type in ['diagram', 'all']:
         visio_builder(site_record, closet_records, diagram_author)
+    # generate GDA 2 documents zip file
+    staging_path = BASE_DIR + base_system.DIRECTORIES['staging']
+    crest_str = str(site_record.crest)[-4:]
+    gda_zip_file = ZipFile(
+        staging_path + base_system.get_filename(site_record.crest, 'zip'), 'w')
+    for filename in listdir(staging_path):
+        filepath = staging_path + filename
+        if crest_str in filename and 'GDA2' not in filename:
+            gda_zip_file.write(filepath, filename)
+            remove(filepath)
+    gda_zip_file.close()
 
 
 def combine_ip_requirements(ip_requirements, required_prefixes, preconfigured_subnets):

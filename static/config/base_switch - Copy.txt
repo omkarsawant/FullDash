@@ -1,0 +1,303 @@
+!!--Commands
+
+
+!!--Privileged Execution Mode
+enable
+!
+!
+!!--Switch Priority
+switch <num> priority <priority>
+!
+!
+!!--Smart Software Registration
+license smart enable
+license smart register idtoken <token>
+!
+!
+!!--Configure Mode
+configure terminal
+!
+!
+!!--Hostname
+hostname <hostname>
+!
+!
+!!--Branch Version Identification ACL
+ip access-list extended branch-office
+ remark Branch Office 3.0
+!
+!
+!!--VTP
+vtp domain AIGGS
+vtp mode transparent
+!
+!
+!!--Multicast
+ip multicast-routing 
+ip igmp snooping 
+!
+!
+!!--UDLD
+udld enable
+udld message time 7
+!
+!
+!!--STP
+spanning-tree mode rapid-pvst
+spanning-tree portfast bpduguard default
+spanning-tree loopguard default
+spanning-tree etherchannel guard misconfig
+spanning-tree extend system-id
+!
+!
+!!--Error Disable Recovery
+errdisable recovery interval 900
+errdisable recovery cause udld 
+errdisable recovery cause channel-misconfig
+errdisable recovery cause security-violation
+errdisable recovery cause link-flap
+errdisable recovery cause dtp-flap
+errdisable recovery cause gbic-invalid
+errdisable recovery cause l2ptguard
+errdisable recovery cause dhcp-rate-limit
+errdisable recovery cause vmps
+!
+!
+!!--Switch Stack Member Provisioning
+switch <num> provision <model>
+!
+!
+!!--IP Helper Forwarding Protocol
+ip forward-protocol nd
+!
+!
+!!--LLDP Enable
+lldp run
+!
+!
+!!--IP Routing
+ip routing
+!
+!
+!!--QoS Policy
+<QoS_configuration>
+!
+!
+!!--VLAN Configuration
+vlan <data_vlan_number>
+ name DATA-<data_vlan_number>
+!
+vlan <voice_vlan_number>
+ name VOICE-<voice_vlan_number>
+!
+vlan <server_vlan_number>
+ name SERVER-<server_vlan_number>
+!
+vlan 399
+ name Security_VLAN_399
+!
+vlan 499
+ name Voice_Infrastructure_VLAN_499
+!
+!
+!!--VLAN SVI Configuration
+interface vlan <data_vlan_number>
+ description <description>
+ ip address <ip_address> <mask>
+ ip helper-address <address>
+ ip helper-address <NAC_address>
+ no ip redirects
+ no ip proxy-arp
+ no snmp trap link-status
+ no logging event link-status
+ arp timeout 200
+ ip pim sparse-mode
+ ip igmp version 2
+ no shutdown
+!
+interface vlan <voice_vlan_number>
+ description <description>
+ ip address <ip_address> <mask>
+ ip helper-address <address>
+ ip helper-address <NAC_address>
+ ip ospf cost 5
+ no ip redirects
+ no ip proxy-arp
+ no snmp trap link-status
+ no logging event link-status
+ arp timeout 200
+ ip pim sparse-mode
+ ip igmp version 2
+ no shutdown
+!
+interface vlan <server_vlan_number>
+description <description>
+ ip address <ip address> <mask>
+ ip ospf cost 5
+ no ip redirects
+ no ip proxy-arp
+ no snmp trap link-status
+ no logging event link-status
+ arp timeout 200
+ ip pim sparse-mode
+ ip igmp version 2
+ no shutdown
+!
+interface vlan 399
+ description <description>
+ ip address <ip address> 255.255.255.192
+ ip helper-address <address>
+ ip helper-address <NAC_address>
+ ip ospf cost 5
+ no ip redirects
+ no ip proxy-arp
+ no snmp trap link-status
+ no logging event link-status
+ arp timeout 200
+ ip pim sparse-mode
+ ip igmp version 2
+ no shutdown
+!
+interface vlan 499
+description <description>
+ ip address <ip address> <mask>
+ ip ospf cost 5
+ no ip redirects
+ no ip proxy-arp
+ no snmp trap link-status
+ no logging event link-status
+ arp timeout 200
+ ip pim sparse-mode
+ ip igmp version 2
+ no shutdown
+!
+interface vlan 1
+ no ip address
+!
+!
+!!--Loopback Interface
+interface Loopback0
+ ip address <address> 255.255.255.255
+ description <description>
+!
+!
+!!--Uplinks to Core/WAN
+interface Gig1/1/4
+ description <description>
+ no switchport
+ ip address <ip_address> 255.255.255.254
+ ip ospf network point-to-point
+ ip ospf cost 10
+ carrier-delay msec 0
+ dampening
+ logging event link-status
+ load-interval 30
+ ip pim sparse-mode
+ no shutdown
+!
+interface Gig2/1/4
+ description <description>
+ no switchport
+ ip address <ip_address> 255.255.255.254
+ ip ospf network point-to-point
+ ip ospf cost 10
+ carrier-delay msec 0
+ dampening
+ load-interval 30
+ logging event link-status
+ ip pim sparse-mode
+ no shutdown
+!
+!
+!!--General Access Ports
+interface range Gig<x>/0/1-36
+ switchport mode access
+ description <description>
+ switchport access vlan <data_vlan_number>
+ switchport voice vlan <voice_vlan_number>
+ speed auto
+ duplex auto
+ spanning-tree portfast
+ storm-control broadcast level 4.00 2.00
+ snmp trap mac-notification change added
+ snmp trap mac-notification change removed
+ no snmp trap link-status
+ no logging event link-status
+ no logging event power-inline-status
+ service-policy output <QoS_policy>
+ no shutdown
+!
+interface range Gig<x>/0/37-43
+ switchport mode access
+ description <description>
+ switchport access vlan <data_vlan_number>
+ switchport voice vlan <voice_vlan_number>
+ speed auto
+ duplex auto
+ spanning-tree portfast
+ storm-control broadcast level 4.00 2.00
+ snmp trap mac-notification change added
+ snmp trap mac-notification change removed
+ no snmp trap link-status
+ no logging event link-status
+ no logging event power-inline-status
+ service-policy output <QoS_policy>
+ no shutdown
+!
+!
+!!--Access Point Ports
+interface range Gig<x>/0/44-48
+ switchport mode access
+ description <description>
+ switchport access vlan <data_vlan_number>
+ speed auto
+ duplex auto
+ spanning-tree portfast
+ storm-control broadcast level 4.00 2.00
+ logging event link-status
+ snmp trap mac-notification change added
+ snmp trap mac-notification change removed
+ snmp trap link-status
+ logging event link-status
+ logging event power-inline-status
+ no shutdown
+!
+!
+!!--Other Device Ports
+interface Gig<x/y/z>
+ switchport mode access
+ description <description>
+ switchport access vlan <vlan_number>
+ speed auto
+ duplex auto
+ spanning-tree portfast
+ storm-control broadcast level 4.00 2.00
+ logging event link-status
+ snmp trap mac-notification change added
+ snmp trap mac-notification change removed
+ no snmp trap link-status
+ no logging event link-status
+ no logging event power-inline-status
+ no shutdown
+!
+!
+!!--Unused Uplink Ports
+interface Gig<x/y/z>
+ description l2|acc|-|-|-|-|empty int
+ no snmp trap link-status
+ shutdown
+!
+!
+!!--OSPF
+router ospf 1
+ router-id <loopback_0_address>
+ passive-interface default
+ no passive-interface Gig 1/1/3
+ no passive-interface Gig 1/1/4
+ no passive-interface Gig 2/1/4
+ area <area_num> stub
+ network 0.0.0.0 255.255.255.255 area <area_num>
+ log-adjacency-changes
+!
+!
+!!--Device Management
