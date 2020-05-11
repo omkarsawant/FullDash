@@ -4,6 +4,17 @@ from interactive.settings import BASE_DIR
 from .models import AccessPortBlock, AccessSwitch, Vlan
 from closet.models import Closet
 
+ACCESS_SWITCH_MODELS = {
+    'MGIG': {
+        'Catalyst 3850': 'WS-C3850-12X48U-S',
+        'Catalyst 9300': 'C9300-48UXM-A',
+    },
+    'NMGIG': {
+        'Catalyst 3850': 'WS-C3850-48U-S',
+        'Catalyst 9300': 'C9300-48U-A',
+    },
+}
+
 ACCESS_SWITCH_SPECS = {
     'MGIG_STACK': {
         'BASE_INTR': {
@@ -418,14 +429,24 @@ def get_stack_port_names(access_switch):
     return port_name_list
 
 
+def get_stack_model_string(access_switch_record):
+    stack_model_string = ''
+    mgig_count = access_switch_record.mgig_count
+    if mgig_count > 0:
+        stack_model_string = stack_model_string + \
+            ACCESS_SWITCH_MODELS['MGIG'][access_switch_record.stack_model] + \
+            'x' + str(mgig_count) + '\n'
+    return stack_model_string + \
+        ACCESS_SWITCH_MODELS['NMGIG'][access_switch_record.stack_model] + \
+        'x' + str(access_switch_record.switch_count - mgig_count)
+
+
 def get_device_dict(access_switch_record, key_prefix):
     device_dict = {}
     device_dict[key_prefix + '_HOSTNAME'] = access_switch_record.hostname
     device_dict[key_prefix + '_LOOPBACK'] = access_switch_record.loopback_ip
     device_dict[key_prefix +
-                '_MGIG_C'] = str(access_switch_record.mgig_count)
-    device_dict[key_prefix + '_NMGIG_C'] = str(
-        access_switch_record.switch_count - access_switch_record.mgig_count)
+                '_STACK_MODELS'] = get_stack_model_string(access_switch_record)
     device_dict[key_prefix + '_UP1'] = '.' + \
         access_switch_record.uplink_1_ip.split('.')[-1]
     device_dict[key_prefix + '_N_UP1'] = str(IPv4Network(
