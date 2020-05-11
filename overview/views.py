@@ -52,7 +52,8 @@ def build_view(request, *args, **kwargs):
         gda_zip_file = open(gda_zip_filename, 'rb')
         http_response = HttpResponse(
             gda_zip_file.read(), content_type='application/zip')
-        http_response['Content-Disposition'] = 'attachment; filename="foo.zip"'
+        http_response['Content-Disposition'] = 'attachment; filename="' + \
+            base_system.get_filename(site_record.crest, 'zip') + '"'
         gda_zip_file.close()
         remove(gda_zip_filename)
         return http_response
