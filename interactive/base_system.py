@@ -6,6 +6,8 @@ from closet.models import Closet
 from onboard.models import Site
 from overview.forms import NavbarForm
 from router.models import Router
+from .settings import BASE_DIR
+from csv import DictReader
 
 ERROR_IMAGE_COUNT = 1
 
@@ -20,8 +22,9 @@ COMMUNITIES = {
 DIRECTORIES = {
     'config': '/static/config/',
     'diagrams': '/static/diagrams/',
-    'staging': '/static/staging/',
     'ipam': '/static/ipam/',
+    'site': '/static/site/',
+    'staging': '/static/staging/',
 }
 
 MESSAGES = {
@@ -207,26 +210,64 @@ def get_mdf_device_hostnames(site_record, mdf_closets, device):
 
 
 def get_site_details(crest):
-    # TODO: define
     site_details = {}
-    if crest == 1002659:
-        site_details['address'] = 'New Jersey/194 South Wood Avenue'
-        site_details['capacity'] = 106
-        site_details['headcount'] = 88
-        site_details['network_type'] = Site.NetworkTypeChoices.SMALL_BRANCH
-        site_details['router'] = Site.RouterChoices.ISR_4331
-        site_details['core'] = Site.CoreChoices.NO_CORE
-        site_details['server'] = Site.ServerChoices.NO_SERVER
-        site_details['nearest_dc'] = Site.NearestDcChoices.AM1
-    else:
-        site_details['address'] = 'Stevens Point/3300 Business Park Drive'
-        site_details['capacity'] = 1255
-        site_details['headcount'] = 941
-        site_details['network_type'] = Site.NetworkTypeChoices.LARGE_BRANCH
-        site_details['router'] = Site.RouterChoices.ISR_4351
-        site_details['core'] = Site.CoreChoices.CATALYST_9500
-        site_details['server'] = Site.ServerChoices.CATALYST_9500
-        site_details['nearest_dc'] = Site.NearestDcChoices.AM1
+    site_database_file = open(
+        BASE_DIR + DIRECTORIES['site'] + 'sites_database.csv', encoding='cp1252')
+    sites_database = DictReader(site_database_file)
+    for record in sites_database:
+        if int(record['crest']) == crest:
+            capacity = int(record['capacity'])
+            floors = int(record['floors'])
+            site_details['address'] = record['address']
+            site_details['capacity'] = capacity
+            site_details['headcount'] = int(record['headcount'])
+            site_details['nearest_dc'] = record['nearest_dc']
+            if capacity < 11:
+                site_details['network_type'] = Site.NetworkTypeChoices.MICRO_BRANCH
+                site_details['router'] = Site.RouterChoices.ISR_4331
+                site_details['core'] = Site.CoreChoices.NO_CORE
+                site_details['server'] = Site.ServerChoices.NO_SERVER
+            elif capacity < 31:
+                site_details['network_type'] = Site.NetworkTypeChoices.MINI_BRANCH
+                site_details['router'] = Site.RouterChoices.ISR_4331
+                site_details['core'] = Site.CoreChoices.NO_CORE
+                site_details['server'] = Site.ServerChoices.NO_SERVER
+            elif capacity < 101:
+                site_details['network_type'] = Site.NetworkTypeChoices.SMALL_BRANCH
+                site_details['router'] = Site.RouterChoices.ISR_4331
+                site_details['core'] = Site.CoreChoices.NO_CORE
+                site_details['server'] = Site.ServerChoices.NO_SERVER
+            elif capacity < 151 and floors < 2:
+                site_details['network_type'] = Site.NetworkTypeChoices.SMALL_BRANCH
+                site_details['router'] = Site.RouterChoices.ISR_4331
+                site_details['core'] = Site.CoreChoices.NO_CORE
+                site_details['server'] = Site.ServerChoices.NO_SERVER
+            elif capacity < 301 and floors < 3:
+                site_details['network_type'] = Site.NetworkTypeChoices.MEDIUM_BRANCH_1
+                site_details['router'] = Site.RouterChoices.ISR_4351
+                site_details['core'] = Site.CoreChoices.NO_CORE
+                site_details['server'] = Site.ServerChoices.NO_SERVER
+            elif capacity < 301 and floors < 11:
+                site_details['network_type'] = Site.NetworkTypeChoices.MEDIUM_BRANCH_2
+                site_details['router'] = Site.RouterChoices.ISR_4351
+                site_details['core'] = Site.CoreChoices.CATALYST_9500
+                site_details['server'] = Site.ServerChoices.CATALYST_9500
+            elif capacity < 1201:
+                site_details['network_type'] = Site.NetworkTypeChoices.LARGE_BRANCH
+                site_details['router'] = Site.RouterChoices.ISR_4451
+                site_details['core'] = Site.CoreChoices.CATALYST_9500
+                site_details['server'] = Site.ServerChoices.CATALYST_9500
+            elif capacity < 2001:
+                site_details['network_type'] = Site.NetworkTypeChoices.MEDIUM_CAMPUS
+                site_details['router'] = Site.RouterChoices.ASR_1001_X
+                site_details['core'] = Site.CoreChoices.CATALYST_9500
+                site_details['server'] = Site.ServerChoices.CATALYST_9500
+            else:
+                site_details['network_type'] = Site.NetworkTypeChoices.LARGE_CAMPUS
+                site_details['router'] = Site.RouterChoices.ASR_1001_HX
+                site_details['core'] = Site.CoreChoices.CATALYST_9500
+                site_details['server'] = Site.ServerChoices.CATALYST_9500
+    site_database_file.close()
     return site_details
 
 

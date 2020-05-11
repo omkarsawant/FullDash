@@ -42,3 +42,4 @@ class OnboardDetailForm(forms.ModelForm):
         self.fields['address'].widget.attrs['size'] = 64
         self.fields['capacity'].widget.attrs.update(readonly=True)
         self.fields['headcount'].widget.attrs.update(readonly=True)
+        self.fields['network_type'].widget.attrs.update(readonly=True)

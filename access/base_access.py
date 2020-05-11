@@ -45,7 +45,7 @@ class AccessSwitchDevice:
         else:
             other_access_switch_record = AccessSwitch.objects.filter(
                 closet__in=Closet.objects.filter(site=site_record)).exclude(id=self.device_record.id)
-            if other_access_switch_record and other_access_switch_record.id < self.device_record.id:
+            if other_access_switch_record and other_access_switch_record[0].id < self.device_record.id:
                 self.uplink_type = 'router_secondary'
             else:
                 self.uplink_type = 'router_primary'
@@ -421,6 +421,7 @@ def get_stack_port_names(access_switch):
 def get_device_dict(access_switch_record, key_prefix):
     device_dict = {}
     device_dict[key_prefix + '_HOSTNAME'] = access_switch_record.hostname
+    device_dict[key_prefix + '_LOOPBACK'] = access_switch_record.loopback_ip
     device_dict[key_prefix +
                 '_MGIG_C'] = str(access_switch_record.mgig_count)
     device_dict[key_prefix + '_NMGIG_C'] = str(
