@@ -55,9 +55,15 @@ MESSAGES = {
     'ACCESS_UPDATED': '',
     'CORE_UPDATED': '',
     'DUPLICATE_VLAN': 'Only one security and voice server VLAN permitted.',
+    'NO_ACCESS_STACK': 'No access stacks have been defined for this site.',
+    'NO_CLOSET': 'No closets have been defined for this site.',
+    'NO_SUBNET': 'The subnets requested for the site cannot be accommodated by the supernets.',
+    'NO_SUPERNET': 'The site does not have any supernets assigned to it.',
+    'NO_ROUTER': 'No routers have been defined for this site.',
     'OVERLAPPING_ACCESS': 'Warning: Access Switch has overlapping port assingments',
     'SERVER_UPDATED': '',
     'SITE_ONBOARDED': 'Site was successfully onboarded. Please create network closets below.',
+    'SUCCESS': 'Site built successfully.',
     'WAN_UPDATED': '',
 }
 

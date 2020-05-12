@@ -44,8 +44,9 @@ def build_view(request, *args, **kwargs):
             else:
                 base_system.set_form_errors(request, obj.build_form)
                 return render(request, template_name, {'obj': obj})
-        obj.build_form = BuildForm(request.POST, initial={
-                                   'build_output': build_output})
+        if build_output != 'success':
+            obj.build_form = BuildForm(initial={'build_output': build_output})
+            return render(request, template_name, {'obj': obj})
         gda_zip_filename = BASE_DIR + \
             base_system.DIRECTORIES['staging'] + \
             base_system.get_filename(site_record.crest, 'zip')
