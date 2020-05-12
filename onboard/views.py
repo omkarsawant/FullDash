@@ -27,6 +27,14 @@ def onboarding_view(request, *args, **kwargs):
                 cleaned_data = obj.form.cleaned_data
                 meeting_standards = base_system.check_hardware_standards(
                     request, cleaned_data['crest'])
+                illegal_standards = base_system.check_illegal_configuration(
+                    request)
+                if (not meeting_standards) and (illegal_standards):
+                    base_system.set_error(
+                        request, 'illegal_site', illegal_standards)
+                    obj.submit_type = 'btn-outline-primary'
+                    obj.submit_text = 'Create Network'
+                    return render(request, template_name, {'obj': obj})
                 if (not meeting_standards) and ('confirm' not in request.POST):
                     base_system.activate_modal(obj, 'NON_STANDARD')
                     obj.submit_type = 'btn-outline-warning'
@@ -47,12 +55,17 @@ def onboarding_view(request, *args, **kwargs):
         else:
             obj.form = OnboardLookupForm(request.POST)
             if obj.form.is_valid():
-                # TODO: lookup site in form
                 initial.update(obj.form.cleaned_data)
-                initial.update(base_system.get_site_details(initial['crest']))
-                obj.form = OnboardDetailForm(initial=initial)
-                obj.submit_type = 'btn-outline-primary'
-                obj.submit_text = 'Create Network'
-                return render(request, template_name, {'obj': obj})
+                site_details = base_system.get_site_details(initial['crest'])
+                if site_details:
+                    initial.update(site_details)
+                    obj.form = OnboardDetailForm(initial=initial)
+                    obj.submit_type = 'btn-outline-primary'
+                    obj.submit_text = 'Create Network'
+                    return render(request, template_name, {'obj': obj})
+                else:
+                    base_system.set_error(request, 'no_site')
             base_system.set_form_errors(request, obj.form)
+            obj.submit_type = 'btn-outline-primary'
+            obj.submit_text = 'Create Network'
             return render(request, template_name, {'obj': obj})

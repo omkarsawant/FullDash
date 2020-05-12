@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <form class='ml-2 mt-4 mb-1' method="POST">{% csrf_token %}
-    <h4 class='mt-4 mb-4'>Access Switch Stack Onboarding Form</h4>
+    <h4 class='mt-4 mb-4'>Access Switch Stack Modification Form</h4>
     <h5 class='mt-4 mb-2'>Parameters for {{ obj.access_switch_record.hostname }}</h5>
     <div class='row ml-1'>
         <label class='col-2 col-form-label'>{{ obj.access_switch_form.stack_model.label }}</label>
@@ -115,5 +115,7 @@
     {% endfor %}
     <button type="submit" class='btn btn-outline-primary mt-4 inline-block'>Commit</button>
     <button type="submit" name='finish' class='btn btn-outline-success mt-4 inline-block'>Finish Up</button>
+    <br>
+    <button type="submit" name='delete' class='btn btn-outline-danger mt-4 inline-block'>Delete Stack</button>
 </form>
 {% endblock content %}

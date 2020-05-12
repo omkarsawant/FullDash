@@ -27,6 +27,29 @@ DIRECTORIES = {
     'staging': '/static/staging/',
 }
 
+ERRORS = {
+    'no_site': {
+        'type': 'error',
+        'message': 'Site was not found for the given CREST. Please try again.'
+    },
+    'illegal_site': {
+        'type': 'error',
+        'message': 'EMPTY_MESSAGE'
+    },
+    'mdf_limit_exceeded': {
+        'type': 'error',
+        'message': 'A site cannot have more than 2 MDFs.'
+    },
+    '4331_idf_limit_exceeded': {
+        'type': 'error',
+        'message': 'A site with ISR 4331s cannot have more than 1 IDF.'
+    },
+    '4351_idf_limit_exceeded': {
+        'type': 'error',
+        'message': 'A site with ISR 4351s cannot have more than 2 IDF'
+    },
+}
+
 MESSAGES = {
     'ACCESS_CREATED': 'New access switch stack was initialized. Please specify the details below.',
     'ACCESS_UPDATED': '',
@@ -49,7 +72,7 @@ MODALS = {
     },
     'NON_STANDARD': {
         'HEADER': '''Non-Standard Network Build''',
-        'BODY': '''The options you have selected do not conform to the latest standards. Please click 'Confirm Non-Standard Network'  to confirm network creation''',
+        'BODY': 'The options you have selected do not conform to the latest standards.\nPlease click "Confirm Non-Standard Network" to confirm network creation',
     },
     'WAN_GREEN_SUCCESS': {
         'HEADER': '''Build successful''',
@@ -97,6 +120,16 @@ def check_hardware_standards(request, crest):
             meeting_standards = False
             break
     return meeting_standards
+
+
+def check_illegal_configuration(request):
+    illegal_scan_result = ''
+    if request.POST['router'] == Site.RouterChoices.ISR_4331:
+        if request.POST['core'] != Site.CoreChoices.NO_CORE or request.POST['server'] != Site.ServerChoices.NO_SERVER:
+            illegal_scan_result = 'A site with ISR 4331 cannot have core or server switches'
+    if request.POST['server'] != Site.ServerChoices.NO_SERVER and request.POST['core'] == Site.CoreChoices.NO_CORE:
+        illegal_scan_result = 'Server switch layer cannot be present without a core switch layer'
+    return illegal_scan_result
 
 
 def delete_extra_devices(device, closet_records):
@@ -205,7 +238,7 @@ def get_mdf_device_hostnames(site_record, mdf_closets, device):
         mdf_device_hostnames.append(get_device_hostname(
             site_record, mdf_closets[0], device, 1))
         mdf_device_hostnames.append(get_device_hostname(
-            site_record, mdf_closets[1], device, 2))
+            site_record, mdf_closets[1], device, 1))
     return mdf_device_hostnames
 
 
@@ -306,6 +339,13 @@ def initialize_navbar(obj, request, site_id=None):
         obj.navbar = NavbarForm()
     obj.site_id = site_id
     return site_record
+
+
+def set_error(request, error_type, error_message=None):
+    if not error_message:
+        error_message = ERRORS[error_type]['message']
+    exec('messages.' + ERRORS[error_type]['type'] +
+         '(request, "' + error_message + '")')
 
 
 def set_form_errors(request, *forms):

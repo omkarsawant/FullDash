@@ -34,6 +34,9 @@ def access_brown_view(request, *args, **kwargs):
             site_record_navbar = Site.objects.get(
                 network_name=request.POST['site'])
             return redirect(reverse('overview', kwargs={'site_id': site_record_navbar.id}))
+        if 'delete' in request.POST:
+            obj.access_switch_record.delete()
+            return redirect(reverse('access_lising', kwargs={'site_id': site_record.id}))
         obj.access_switch_form = AccessSwitchBrownForm(
             request.POST, instance=obj.access_switch_record, prefix='access_switch')
         obj.vlan_formset = VlanBrownFormset(
@@ -168,6 +171,11 @@ def access_listing_view(request, *args, **kwargs):
         closet_records = Closet.objects.filter(site=site_record)
         obj.access_switch_records = AccessSwitch.objects.filter(
             closet__in=closet_records)
+        if site_record.core == Site.CoreChoices.NO_CORE:
+            if site_record.router == Site.RouterChoices.ISR_4331 and len(obj.access_switch_records) > 0:
+                return render(request, template_name, {'obj': obj})
+            if site_record.router == Site.RouterChoices.ISR_4351 and len(obj.access_switch_records) > 1:
+                return render(request, template_name, {'obj': obj})
         obj.form = AccessListingForm(site_record=site_record)
         return render(request, template_name, {'obj': obj})
     if request.method == 'POST':

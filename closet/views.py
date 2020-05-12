@@ -25,7 +25,25 @@ def closet_view(request, *args, **kwargs):
         obj.formset = ClosetCreateFormset(request.POST)
         if obj.formset.is_valid():
             instances = obj.formset.save(commit=False)
+            mdf_categories = [Closet.CategoryChoices.MDF,
+                              Closet.CategoryChoices.MDF_IDF]
+            idf_categories = [Closet.CategoryChoices.IDF,
+                              Closet.CategoryChoices.MDF_IDF]
             for instance in instances:
+                if instance.category in mdf_categories:
+                    if len(Closet.objects.filter(site=site_record, category__in=mdf_categories)) > 1:
+                        base_system.set_error(request, 'mdf_limit_exceeded')
+                        continue
+                if site_record.router == Site.RouterChoices.ISR_4331 and instance.category in idf_categories:
+                    if len(Closet.objects.filter(site=site_record, category__in=idf_categories)) > 0:
+                        base_system.set_error(
+                            request, '4331_idf_limit_exceeded')
+                        continue
+                if site_record.router == Site.RouterChoices.ISR_4351 and instance.category in idf_categories:
+                    if site_record.core == Site.CoreChoices.NO_CORE and len(Closet.objects.filter(site=site_record, category__in=idf_categories)) > 1:
+                        base_system.set_error(
+                            request, '4351_idf_limit_exceeded')
+                        continue
                 if not instance.closet:
                     instance.site = site_record
                     closet_record_index = len(Closet.objects.filter(
