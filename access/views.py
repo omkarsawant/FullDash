@@ -84,6 +84,8 @@ def access_brown_view(request, *args, **kwargs):
                 access_port_block_starts.append(access_port_block_start)
                 access_port_block_ends.append(access_port_block_end)
         if 'finish' in request.POST:
+            site_record.signal_updated_access = True
+            site_record.save()
             return redirect(reverse('access_lising', kwargs={'site_id': site_record.id}))
         return redirect(reverse('access_brown', kwargs={'site_id': site_record.id, 'access_switch_id': obj.access_switch_record.id}))
 
@@ -158,6 +160,8 @@ def access_green_view(request, *args, **kwargs):
                 access_port_block_starts.append(access_port_block_start)
                 access_port_block_ends.append(access_port_block_end)
         if 'finish' in request.POST:
+            site_record.signal_updated_access = True
+            site_record.save()
             return redirect(reverse('access_lising', kwargs={'site_id': site_record.id}))
         return redirect(reverse('access_green', kwargs={'site_id': site_record.id, 'access_switch_id': obj.access_switch_record.id}))
 
@@ -190,6 +194,8 @@ def access_listing_view(request, *args, **kwargs):
         access_switch_record = AccessSwitch.objects.create(
             hostname=access_hostname, closet=closet_record)
         if site_record.project_type == Site.ProjectTypeChoices.GREENFIELD:
+            site_record.signal_created_access = True
+            site_record.save()
             return redirect(reverse('access_green', kwargs={'site_id': site_record.id, 'access_switch_id': access_switch_record.id}))
         else:
             return redirect(reverse('access_brown', kwargs={'site_id': site_record.id, 'access_switch_id': access_switch_record.id}))

@@ -52,7 +52,7 @@ ERRORS = {
 
 MESSAGES = {
     'ACCESS_CREATED': 'New access switch stack was initialized. Please specify the details below.',
-    'ACCESS_UPDATED': '',
+    'ACCESS_UPDATED': 'Access switch stack was modified successfully.',
     'CORE_UPDATED': '',
     'DUPLICATE_VLAN': 'Only one security and voice server VLAN permitted.',
     'NO_ACCESS_STACK': 'No access stacks have been defined for this site.',
@@ -64,7 +64,8 @@ MESSAGES = {
     'SERVER_UPDATED': '',
     'SITE_ONBOARDED': 'Site was successfully onboarded. Please create network closets below.',
     'SUCCESS': 'Site built successfully.',
-    'WAN_UPDATED': '',
+    'WAN_CREATED': 'WAN routers were successfully onboarded.',
+    'WAN_UPDATED': 'WAN routers were modified successfully.',
 }
 
 MODALS = {
@@ -316,6 +317,10 @@ def initialize_navbar(obj, request, site_id=None):
         obj.navbar = NavbarForm(initial={'site': site_record.network_name})
         if site_record.signal_created_access:
             messages.success(request, MESSAGES['ACCESS_CREATED'])
+            site_record.signal_created_access = False
+        if site_record.signal_created_wan:
+            messages.success(request, MESSAGES['WAN_CREATED'])
+            site_record.signal_created_wan = False
         if site_record.signal_duplicate_vlan:
             messages.error(request, MESSAGES['DUPLICATE_VLAN'])
             site_record.signal_duplicate_vlan = False
@@ -334,10 +339,13 @@ def initialize_navbar(obj, request, site_id=None):
             site_record.signal_updated_access = False
         if site_record.signal_updated_core:
             messages.success(request, MESSAGES['CORE_UPDATED'])
+            site_record.signal_updated_core = False
         if site_record.signal_updated_server:
             messages.success(request, MESSAGES['SERVER_UPDATED'])
+            site_record.signal_updated_server = False
         if site_record.signal_updated_wan:
             messages.success(request, MESSAGES['WAN_UPDATED'])
+            site_record.signal_updated_wan = False
         site_record.save()
         # TODO: get caller name and display messages
     else:

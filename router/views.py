@@ -33,8 +33,8 @@ def wan_brown_view(request, *args, **kwargs):
         router_2_initial = router_records[1]
         obj.router_hostnames.append(router_records[0].hostname)
         obj.router_hostnames.append(router_records[1].hostname)
+    obj.router_forms = list()
     if request.method == 'GET':
-        obj.router_forms = list()
         obj.router_forms.append(WanBrownForm(
             instance=router_1_initial, prefix='router_1'))
         obj.router_forms.append(WanBrownForm(
@@ -45,13 +45,25 @@ def wan_brown_view(request, *args, **kwargs):
             site_record_navbar = Site.objects.get(
                 network_name=request.POST['site'])
             return redirect(reverse('overview', kwargs={'site_id': site_record_navbar.id}))
-        router_1_form = WanBrownForm(request.POST, prefix='router_1')
-        router_2_form = WanBrownForm(request.POST, prefix='router_2')
-        if(router_1_form.is_valid() and router_2_form.is_valid()):
-            # TODO: make model
-            pass
-        # TODO: finish the code!
-        # TODO: put message in overview about success
+        obj.router_forms.append(WanBrownForm(request.POST, prefix='router_1'))
+        obj.router_forms.append(WanBrownForm(request.POST, prefix='router_2'))
+        if(obj.router_forms[0].is_valid() and obj.router_forms[1].is_valid()):
+            router_1_record = obj.router_forms[0].save(commit=False)
+            router_2_record = obj.router_forms[1].save(commit=False)
+            if len(mdf_closet_records) == 1:
+                router_1_record.closet = mdf_closet_records[0]
+                router_2_record.closet = mdf_closet_records[0]
+            else:
+                router_1_record.closet = mdf_closet_records[0]
+                router_2_record.closet = mdf_closet_records[1]
+            router_1_record.save()
+            router_2_record.save()
+            site_record.signal_updated_wan = True
+            site_record.save()
+            return redirect(reverse('wan_brown', kwargs={'site_id': site_record.id}))
+        base_system.set_form_errors(
+            request, obj.router_forms[0], obj.router_forms[1])
+        return render(request, template_name, {'obj': obj})
 
 
 def wan_green_view(request, *args, **kwargs):
@@ -92,6 +104,9 @@ def wan_green_view(request, *args, **kwargs):
                 router_2_record.closet = mdf_closet_records[1]
             router_1_record.save()
             router_2_record.save()
+            site_record.signal_created_wan = True
+            site_record.save()
+            return redirect(reverse('wan_green', kwargs={'site_id': site_record.id}))
         base_system.set_form_errors(request, obj.form, obj.sub_form)
         return render(request, template_name, {'obj': obj})
 
